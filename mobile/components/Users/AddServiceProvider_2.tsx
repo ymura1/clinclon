@@ -16,9 +16,17 @@ import {ScrollView} from 'react-native-gesture-handler';
 import DatePicker from 'react-native-date-picker';
 import moment from 'moment';
 
-const AddNanny_2 = ({route, navigation}: any) => {
-  const {ownerEmail, username, rate, rateType, getUsers, setErrors} =
-    route.params;
+const AddServiceProvider_2 = ({route, navigation}: any) => {
+  const {
+    employerEmail,
+    serviceProviderEmail,
+    firstName,
+    lastName,
+    rate,
+    rateType,
+    getServiceProviders,
+    setErrors,
+  } = route.params;
   const days = [
     'Monday',
     'Tuesday',
@@ -82,13 +90,15 @@ const AddNanny_2 = ({route, navigation}: any) => {
   };
 
   const navigateToReviewPage = () => {
-    navigation.navigate('AddNanny_review', {
-      ownerEmail,
-      username,
+    navigation.navigate('AddServiceProvider_Review', {
+      employerEmail,
+      serviceProviderEmail,
+      firstName,
+      lastName,
       rate,
       rateType,
       lists,
-      getUsers,
+      getServiceProviders,
       setErrors,
     });
   };
@@ -177,7 +187,7 @@ const AddNanny_2 = ({route, navigation}: any) => {
               </FormControl>
             </Center>
             {selectedDay && startTime && endTime && (
-              <Button onPress={addToLists} borderRadius={20} mt={4}>
+              <Button onPress={addToLists} borderRadius={20} my={4}>
                 Add
               </Button>
             )}
@@ -207,11 +217,14 @@ const AddNanny_2 = ({route, navigation}: any) => {
               </HStack>
             ))}
           </ScrollView>
-          <HStack space={2}>
-            <Button borderRadius={20} onPress={() => navigation.goBack()}>
+          <HStack space={2} my={4} w="90%" justifyContent="space-around">
+            <Button
+              borderRadius={20}
+              onPress={() => navigation.goBack()}
+              w="40%">
               Go Back
             </Button>
-            <Button borderRadius={20} onPress={navigateToReviewPage}>
+            <Button borderRadius={20} onPress={navigateToReviewPage} w="40%">
               Review
             </Button>
           </HStack>
@@ -221,4 +234,4 @@ const AddNanny_2 = ({route, navigation}: any) => {
   );
 };
 
-export default AddNanny_2;
+export default AddServiceProvider_2;

@@ -19,9 +19,7 @@ import {LOCAL_HOST_URL} from '../../config.js';
 import moment from 'moment';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import DatePicker from 'react-native-date-picker';
-import {err} from 'react-native-svg/lib/typescript/xml.js';
 
-console.log('hello');
 const Account = ({route}: any) => {
   const username = route.params.username;
   const [userInfo, setUserInfo] = useState([]);
@@ -55,7 +53,6 @@ const Account = ({route}: any) => {
         username,
       })
       .then(res => {
-        console.log('data', res.data);
         setHistory(res.data);
         setInputErrors({type: '', msg: ''});
       })

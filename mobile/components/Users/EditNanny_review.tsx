@@ -20,7 +20,7 @@ const EditNanny_review = ({route, navigation}: any) => {
     updatedRate,
     updatedRateType,
     updatedStatus,
-    getUsers,
+    getServiceProviders,
     setErrors,
   } = route.params;
 
@@ -36,13 +36,13 @@ const EditNanny_review = ({route, navigation}: any) => {
         finalShifts,
       })
       .then(res => {
-        getUsers();
+        getServiceProviders();
         setErrors({ status: "success", msg: "Successfully edited!"})
-        navigation.navigate('Home_admin', {updatedUsername});
+        navigation.navigate('Home_Employer', {updatedUsername});
       })
       .catch(err => {
         setErrors({ status: "error", msg: "Failed to edit. Please try again!"})
-        navigation.navigate('Home_admin', {updatedUsername});
+        navigation.navigate('Home_Employer', {updatedUsername});
       });
   };
 

@@ -1,4 +1,5 @@
 import UserRepositories from "../repositories/userRepositories";
+import { ServiceProviderInterface } from "../interfaces/ServiceProviderInterface";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -9,23 +10,47 @@ class UserModels {
     this.repositories = new UserRepositories();
   }
 
-  async getOwnerId(email: string) {
-    return await this.repositories.getOwnerId(email);
+  // async getOwnerId(email: string) {
+  //   return await this.repositories.getOwnerId(email);
+  // }
+
+  async getEmployerId(email: string) {
+    return await this.repositories.getEmployerId(email);
   }
 
-  async getUsers(email: string) {
-    const ownerId = await this.getOwnerId(email);
-    return await this.repositories.getUsers(ownerId);
+  async getServiceProviderId(email: string) {
+    return await this.repositories.getServiceProviderId(email);
+  }
+
+  async getServiceProviders(employerEmail: string) {
+    return await this.repositories.getServiceProviders(employerEmail);
   }
 
   async getUser(username: string) {
     return await this.repositories.getUser(username);
   }
 
-  async addUser(user: any) {
-    const ownerId = await this.getOwnerId(user.ownerEmail);
-    const newUserId = await this.repositories.addUser(user, ownerId)
-    return this.addSchedule(newUserId, user.lists)
+  async addServiceProvider(req: any) {
+    const {
+      employerEmail,
+      serviceProviderEmail,
+      firstName,
+      lastName,
+      rate,
+      rateType,
+      lists,
+    } = req;
+    const employerId = await this.repositories.getEmployerId(employerEmail);
+    return await this.repositories.addServiceProvider(
+      employerEmail,
+      firstName,
+      lastName,
+      serviceProviderEmail,
+      rate,
+      rateType,
+      lists,
+      employerId
+    );
   }
 
   async addSchedule(userId: string, user: []) {
@@ -36,37 +61,39 @@ class UserModels {
     const userId = await this.repositories.getUserId(req.user_name);
     await this.repositories.editUser(req, userId);
     const schedule = await this.repositories.getScheduleByUserId(userId);
-    return req.finalShifts.map(async (s: { day: string; start_time: string; end_time: number }) => {
-      await this.repositories.editSchedule(userId, s)
-      // const isMatch = schedule.some((d: any) => d.day === s.day);
-      // if (isMatch) {
-      //   await this.repositories.editSchedule(userId, s);
-      // }
-    })
+    return req.finalShifts.map(
+      async (s: { day: string; start_time: string; end_time: number }) => {
+        await this.repositories.editSchedule(userId, s);
+        // const isMatch = schedule.some((d: any) => d.day === s.day);
+        // if (isMatch) {
+        //   await this.repositories.editSchedule(userId, s);
+        // }
+      }
+    );
   }
 
-  async isUserRegistered(ownerEmail: string, username: string) {
-    const ownerId = await this.getOwnerId(ownerEmail);
-    return await this.repositories.isUserRegistered(ownerId, username);
-  }
+  // async isUserRegistered(ownerEmail: string, username: string) {
+  //   const ownerId = await this.getOwnerId(ownerEmail);
+  //   return await this.repositories.isUserRegistered(ownerId, username);
+  // }
 
-  async deleteUser(ownerEmail: string, username: string) {
-    const ownerId = await this.getOwnerId(ownerEmail);
-    const userId = await this.repositories.getUserId(username);
-    await this.repositories.deleteSchedule(userId);
-    return await this.repositories.deleteUser(ownerId, userId);
-  }
+  // async deleteUser(ownerEmail: string, username: string) {
+  //   const ownerId = await this.getOwnerId(ownerEmail);
+  //   const userId = await this.repositories.getUserId(username);
+  //   await this.repositories.deleteSchedule(userId);
+  //   return await this.repositories.deleteUser(ownerId, userId);
+  // }
 
   async startRecord(req: any) {
     const { username, checkedInTime } = req;
     const userId = await this.repositories.getUserId(username);
-    return await this.repositories.startRecord(userId, checkedInTime)
+    return await this.repositories.startRecord(userId, checkedInTime);
   }
 
   async endRecord(req: any) {
     const { username, checkedOutTime } = req;
     const userId = await this.repositories.getUserId(username);
-    return await this.repositories.endRecord(userId, checkedOutTime)
+    return await this.repositories.endRecord(userId, checkedOutTime);
   }
 
   async getTodaysRecord(username: string) {
@@ -87,7 +114,7 @@ class UserModels {
   async searchByPeriod(req: any) {
     const { from, to, username } = req;
     const userId = await this.repositories.getUserId(username);
-    return await this.repositories.searchByPeriod(from, to, userId)
+    return await this.repositories.searchByPeriod(from, to, userId);
   }
 
   async searchByDateYear(req: any) {
@@ -97,10 +124,14 @@ class UserModels {
   }
 
   async getRecord(username: string) {
-    const currentYear = (new Date().getFullYear()).toString();
+    const currentYear = new Date().getFullYear().toString();
     const currentMonth = (new Date().getMonth() + 1).toString();
     const userId = await this.repositories.getUserId(username);
-    return await this.repositories.searchByDateYear(currentYear, currentMonth, userId)
+    return await this.repositories.searchByDateYear(
+      currentYear,
+      currentMonth,
+      userId
+    );
   }
 }
 

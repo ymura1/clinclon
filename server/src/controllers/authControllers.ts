@@ -7,16 +7,28 @@ class AuthControllers {
     this.models = new AutheModels();
   }
 
-  async signUpAdmin(req: any, res: any) {
-    const isRegistered = await this.models.isOwnerRegistered(req.body.email);
-    if (isRegistered) {
+  // async signUpAdmin(req: any, res: any) {
+  //   const isRegistered = await this.models.isOwnerRegistered(req.body.email);
+  //   if (isRegistered) {
+  //     res.status(400).json({ error: "This email is already used" });
+  //   } else {
+  //     const response = await this.models.signUpAdmin(req.body);
+  //     response
+  //       ? res.sendStatus(200)
+  //       : res.status(400).json({ error: "Failed to sign up" });
+  //   }
+  // }
+
+  async signUpEmployer(req: any, res: any) {
+    const isEmployerRegistered = await this.models.isEmployerRegistered(req.body.email);
+    if (isEmployerRegistered) {
       res.status(400).json({ error: "This email is already used" });
-    } else {
-      const response = await this.models.signUpAdmin(req.body);
-      response
-        ? res.sendStatus(200)
-        : res.status(400).json({ error: "Failed to sign up" });
+      return;
     }
+    const response = await this.models.signUpEmployer(req.body);
+    response
+    ? res.sendStatus(200)
+    : res.status(400).json({ error: "Failed to sign up" });
   }
 
   async signUpNanny(req: any, res: any) {
@@ -55,6 +67,21 @@ class AuthControllers {
       email,
       password
     );
+    if (!isPasswordMatch) {
+      res.status(400).json({ error: "Incorrect email address or password" });
+      return;
+    }
+    res.status(200).send("successfully login");
+  }
+
+  async signInEmployer(req: any, res: any) {
+    const { email, password } = req.body;
+    const isEmployerRegistered = await this.models.isEmployerRegistered(email);
+    if (!isEmployerRegistered) {
+      res.status(400).json({ error: "Incorrect email address or password" });
+      return;
+    }
+    const isPasswordMatch = await this.models.isEmployerPasswordMatch(email, password);
     if (!isPasswordMatch) {
       res.status(400).json({ error: "Incorrect email address or password" });
       return;

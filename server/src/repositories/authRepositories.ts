@@ -1,5 +1,4 @@
-import { v4 as uuidv4 } from "uuid";
-import { OwnerInterface } from "../interfaces/OwnerInterface";
+import { EmployerInterface } from "../interfaces/EmployerInterface";
 import Repositories from "./repositories";
 
 class AuthRepositories {
@@ -7,6 +6,27 @@ class AuthRepositories {
 
   constructor() {
     this.repositories = new Repositories();
+  }
+
+  async isUserRegistered(email: string) {
+    const sql = "SELECT * FROM application_user WHERE email_address = $1;";
+    return (await this.repositories.queryDB(sql, [email])).rowCount > 0;
+  }
+
+  async isUserEmployer(id: string) {
+    const sql = "SELECT * FROM employer WHERE id_application_user = $1;";
+    return (await this.repositories.queryDB(sql, [id])).rowCount > 0;
+  }
+
+  async isUserProvider(id: string) {
+    const sql =
+      "SELECT * FROM service_provider WHERE id_application_user = $1;";
+    return (await this.repositories.queryDB(sql, [id])).rowCount > 0;
+  }
+
+  async getUserId(email: string) {
+    const sql = "SELECT id FROM application_user WHERE email_address = $1;";
+    return (await this.repositories.queryDB(sql, [email])).rows[0].id;
   }
 
   async isOwnerRegistered(email: string) {
@@ -29,11 +49,20 @@ class AuthRepositories {
   async setNannyPassword(username: string, password: string) {
     const sql = "UPDATE users SET user_password = $1 WHERE user_name = $2;";
     await this.repositories.queryDB(sql, [password, username]);
-    console.log("here");
     return true;
   }
 
-  async registerOwner(owner: OwnerInterface) {
+  async signUpEmployer(employer: EmployerInterface) {
+    const {firstName, lastName, email, password } = employer;
+    const sqlApplicationUuser =
+      "INSERT INTO application_user VALUES (gen_random_uuid(), $1, $2, $3, $4, DEFAULT, CURRENT_TIMESTAMP) RETURNING id;";
+    const id = (await this.repositories.queryDB(sqlApplicationUuser, [firstName, lastName, email, password])).rows[0].id;
+    const sqlEmployer = "INSERT INTO employer VALUES (gen_random_uuid(), $1);";
+    await this.repositories.queryDB(sqlEmployer, [id]);
+    return true;
+  }
+
+  async registerOwner(owner: any) {
     const { email, status, createDate, password } = owner;
     const sql =
       "INSERT INTO owners VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6);";
@@ -49,6 +78,12 @@ class AuthRepositories {
         ])
       ).rowCount > 0
     );
+  }
+
+  async getEmployerPassword(email: string) {
+    const sql =
+      "SELECT password FROM application_user WHERE email_address = $1;";
+    return (await this.repositories.queryDB(sql, [email])).rows[0].password;
   }
 
   async getOwnerPassword(email: string) {

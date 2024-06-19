@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import Repositories from "./repositories";
+import { ServiceProviderInterface } from "../interfaces/ServiceProviderInterface";
 
 class UserRepositories {
   repositories: Repositories;
@@ -8,10 +9,22 @@ class UserRepositories {
     this.repositories = new Repositories();
   }
 
-  // ---------------------  Owners  --------------------------------
-  async getOwnerId(email: string) {
-    const sql = "SELECT owner_id FROM owners WHERE email_address = $1;";
-    return (await this.repositories.queryDB(sql, [email])).rows[0].owner_id;
+  // ---------------------  Owners  -------------------------------
+  async getUserId(email: string) {
+    const sql = "SELECT id FROM application_user WHERE email_address = $1;";
+    return (await this.repositories.queryDB(sql, [email])).rows[0].id;
+  }
+
+  async getEmployerId(email: string) {
+    const sql =
+      "SELECT id FROM employer WHERE EXISTS (SELECT id FROM application_user WHERE email_address = $1);";
+    return (await this.repositories.queryDB(sql, [email])).rows[0].id;
+  }
+
+  async getServiceProviderId(email: string) {
+    const sql =
+      "SELECT id FROM service_provider WHERE EXISTS (SELECT id FROM application_user WHERE email_address = $1);";
+    return (await this.repositories.queryDB(sql, [email])).rows[0].id;
   }
 
   // ---------------------  Users  --------------------------------
@@ -21,15 +34,89 @@ class UserRepositories {
     return (await this.repositories.queryDB(sql, [ownerId])).rows;
   }
 
+  async getRateInfo(employerId: string) {
+    const sql =
+      "SELECT id_service_provider, rate, rate_type FROM employer_provider WHERE id_employer = $1;";
+    return (await this.repositories.queryDB(sql, [employerId])).rows;
+  }
+
+  async getUserIdFromServiceProvider(serviceProviderId: string) {
+    const sql =
+      "SELECT id, id_application_user FROM service_provider WHERE id = $1;";
+    return (await this.repositories.queryDB(sql, [serviceProviderId])).rows;
+  }
+
+  async getUserInfo(userId: string) {
+    const sql =
+      "SELECT first_name, last_name, email_address, status FROM application_user WHERE id = $1;";
+    return (await this.repositories.queryDB(sql, [userId])).rows;
+  }
+
+  async getServiceProviders(employerEmail: string) {
+    const sql =
+      "SELECT au2.first_name, au2.last_name, au2.email_address, ep.rate, ep.rate_type FROM application_user au1 INNER JOIN employer e ON au1.id = id_application_user INNER JOIN employer_provider ep ON e.id = ep.id_employer INNER JOIN service_provider sp ON sp.id = ep.id_service_provider INNER JOIN service_provider_schedule sps ON sp.id = sps.service_provider_id INNER JOIN application_user au2 ON au2.id = sp.id_application_user WHERE au1.email_address = $1;";
+    return (await this.repositories.queryDB(sql, [employerEmail])).rows;
+  }
+
   async getUser(username: string) {
     const sql = "SELECT * FROM users WHERE user_name=$1;";
     return (await this.repositories.queryDB(sql, [username])).rows;
   }
 
-  async getUserId(username: string) {
-    const sql = "SELECT user_id from users WHERE user_name = $1;";
-    return (await this.repositories.queryDB(sql, [username])).rows[0].user_id;
+  async addServiceProvider(
+    employerEmail: string,
+    firstName: string,
+    lastName: string,
+    email: string,
+    rate: string,
+    rateType: string,
+    list: any,
+    employerId: string
+  ) {
+    const applicationUserSql =
+      "INSERT INTO application_user VALUES (gen_random_uuid(), $1, $2, $3, $4, DEFAULT, CURRENT_TIMESTAMP) RETURNING id;";
+    const userId = (
+      await this.repositories.queryDB(applicationUserSql, [
+        firstName,
+        lastName,
+        email,
+        null,
+      ])
+    ).rows[0].id;
+    const serviceProviderSql =
+      "INSERT INTO service_provider VALUES (gen_random_uuid(), $1) RETURNING id;";
+    const serviceProviderId = (
+      await this.repositories.queryDB(serviceProviderSql, [userId])
+    ).rows[0].id;
+    // save to employer_provider
+    // update_by => employer Email
+    // id, rate, rate_type, currency, status, update_time, update_by, id_employer, id_service_provider
+    const employerProviderSql =
+      "INSERT INTO employer_provider VALUES (gen_random_uuid(), $1, $2, $3, DEFAULT, CURRENT_TIMESTAMP, $4, $5, $6);";
+    await this.repositories.queryDB(employerProviderSql, [
+      rate,
+      rateType,
+      null,
+      employerEmail,
+      employerId,
+      serviceProviderId,
+    ]);
+    // // save schedule
+    const serviceProviderScheduleSql =
+      "INSERT INTO service_provider_schedule VALUES (gen_random_uuid(), $1, $2, $3, $4);";
+    await this.repositories.queryDB(serviceProviderScheduleSql, [
+      serviceProviderId,
+      list.day,
+      list.start_time,
+      list.end_time,
+    ]);
+    return true;
   }
+
+  // async getUserId(username: string) {
+  //   const sql = "SELECT user_id from users WHERE user_name = $1;";
+  //   return (await this.repositories.queryDB(sql, [username])).rows[0].user_id;
+  // }
 
   async getInfoForNanny(userId: string) {
     const sql =

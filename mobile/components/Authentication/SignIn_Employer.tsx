@@ -16,7 +16,7 @@ import {
 } from 'native-base';
 import validator from 'validator';
 
-const SignIn_Admin = ({navigation}: any) => {
+const SignIn_Employer = ({navigation}: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [inputErrors, setInputErrors] = useState({
@@ -29,12 +29,12 @@ const SignIn_Admin = ({navigation}: any) => {
       return;
     }
     axios
-      .post(`${LOCAL_HOST_URL}/signIn_admin`, {
+      .post(`${LOCAL_HOST_URL}/signIn_employer`, {
         email,
         password,
       })
       .then(() => {
-        navigation.navigate('Home_admin', {ownerEmail: email});
+        navigation.navigate('Home_Employer', {employerEmail: email});
       })
       .catch(err => {
         const errMsg = err.response.data.error;
@@ -132,7 +132,7 @@ const SignIn_Admin = ({navigation}: any) => {
             <Text
               underline
               fontSize="sm"
-              onPress={() => navigation.navigate('SignUp_Admin')}>
+              onPress={() => navigation.navigate('SignUp_Employer')}>
               Sign Up
             </Text>
           </Box>
@@ -151,4 +151,4 @@ const SignIn_Admin = ({navigation}: any) => {
   );
 };
 
-export default SignIn_Admin;
+export default SignIn_Employer;

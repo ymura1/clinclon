@@ -51,7 +51,7 @@ const ResetPassword = ({route, navigation}: any) => {
         ownerEmail,
       })
       .then(() => {
-        navigation.navigate('SignIn_Admin')
+        navigation.navigate('SignIn_Employer')
       })
       .catch(err => {
       });
@@ -115,7 +115,7 @@ const ResetPassword = ({route, navigation}: any) => {
             <Text
               underline
               onPress={() => {
-                navigation.navigate('SignIn_Admin');
+                navigation.navigate('SignIn_Employer');
               }}>
               Log in
             </Text>

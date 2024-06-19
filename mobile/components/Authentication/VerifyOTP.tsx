@@ -40,7 +40,6 @@ const VerifyOTP = ({route, navigation}: any) => {
 
   const handleBackspaceAndEnter = (e, index) => {
     const key = e.nativeEvent.key;
-    console.log('event: ', e.nativeEvent);
     if (key === 'Backspace' && !e.target.value && index > 0) {
       otpBoxReference.current[index - 1].focus();
     }

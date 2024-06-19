@@ -3,21 +3,22 @@ import {LOCAL_HOST_URL} from '../../config.js';
 import axios from 'axios';
 import {useNavigation} from '@react-navigation/native';
 import {Box, Text, Heading, ScrollView, VStack, Button} from 'native-base';
-import User from './User';
-import {UserInterface, RawUserInterface} from '../../interfaces/UserInterface';
+import ServiceProvider from './ServiceProvider';
+import {UserInterface, RawUserInterface} from '../../interfaces/UserInterface.js';
 
-const Users = ({email, setErrors}: any) => {
+const ServiceProviders = ({employerEmail, setErrors}: any) => {
   const {navigate} = useNavigation();
   const [users, setUsers] = useState<UserInterface[] | []>([]);
 
   useEffect(() => {
-    getUsers();
+    getServiceProviders();
   }, []);
 
-  const getUsers = () => {
+  const getServiceProviders = () => {
     axios
-      .get(`${LOCAL_HOST_URL}/users/${email}`)
+      .get(`${LOCAL_HOST_URL}/getServiceProviders/${employerEmail}`)
       .then(res => {
+        console.log('service providers data', res.data)
         const data = processUserData(res.data);
         setUsers(data);
       })
@@ -68,11 +69,11 @@ const Users = ({email, setErrors}: any) => {
           <ScrollView h="380">
             <VStack flex="1">
               {users.map((user, index) => (
-                <User
+                <ServiceProvider
                   key={index}
                   user={user}
-                  getUsers={getUsers}
-                  ownerEmail={email}
+                  getServiceProviders={getServiceProviders}
+                  employerEmail={employerEmail}
                   setErrors={setErrors}
                 />
               ))}
@@ -82,10 +83,10 @@ const Users = ({email, setErrors}: any) => {
       </Box>
       <Button
         onPress={() =>
-          navigate('AddNanny_1', {
-            ownerEmail: email,
+          navigate('AddServiceProvider_1', {
+            employerEmail: employerEmail,
             setErrors: setErrors,
-            getUsers: getUsers,
+            getServiceProviders: getServiceProviders,
           })
         }
         size="md"
@@ -97,4 +98,4 @@ const Users = ({email, setErrors}: any) => {
   );
 };
 
-export default Users;
+export default ServiceProviders;

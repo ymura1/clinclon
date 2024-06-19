@@ -1,5 +1,5 @@
 import AuthRepositories from "../repositories/authRepositories";
-import { OwnerInterface } from "../interfaces/OwnerInterface";
+import { EmployerInterface } from "../interfaces/EmployerInterface";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 dotenv.config();
@@ -20,6 +20,15 @@ class AutheModels {
     this.repositories = new AuthRepositories();
   }
 
+  async isEmployerRegistered(email: string) {
+    const isUserRegistered = await this.repositories.isUserRegistered(email);
+    if (!isUserRegistered) {
+      return;
+    }
+    const userId = await this.repositories.getUserId(email);
+    return await this.repositories.isUserEmployer(userId);
+  }
+
   async isOwnerRegistered(email: string) {
     return await this.repositories.isOwnerRegistered(email);
   }
@@ -30,6 +39,12 @@ class AutheModels {
 
   async isAdminPasswordMatch(email: string, password: string) {
     const hashedPassword = await this.repositories.getOwnerPassword(email);
+    const isMatch = await bcrypt.compare(password, hashedPassword);
+    return isMatch;
+  }
+
+  async isEmployerPasswordMatch(email: string, password: string) {
+    const hashedPassword = await this.repositories.getEmployerPassword(email);
     const isMatch = await bcrypt.compare(password, hashedPassword);
     return isMatch;
   }
@@ -55,15 +70,32 @@ class AutheModels {
     return await this.repositories.setNannyPassword(username, hashedPassword);
   }
 
-  async signUpAdmin(owner: OwnerInterface) {
-    if (owner.password !== null) {
-      const hashedPassword = await bcrypt.hash(
-        owner.password,
-        Number(process.env.SALT_ROUNDS)
-      );
-      owner.password = hashedPassword;
+  async generateHashedPassword(password: string) {
+    const hashedPassword = await bcrypt.hash(
+      password,
+      Number(process.env.SALT_ROUNDS)
+    );
+    return hashedPassword;
+  }
+
+  // async signUpAdmin(owner: OwnerInterface) {
+  //   if (owner.password !== null) {
+  //     const hashedPassword = await bcrypt.hash(
+  //       owner.password,
+  //       Number(process.env.SALT_ROUNDS)
+  //     );
+  //     owner.password = hashedPassword;
+  //   }
+  //   return await this.repositories.registerOwner(owner);
+  // }
+
+  // async signUpEmployer(firstName: string, lastName: string, email: string, password: string) {
+  async signUpEmployer(employer: EmployerInterface) {
+    if (employer.password !== null) {
+      const hashedPassword = await this.generateHashedPassword(employer.password);
+      employer.password = hashedPassword;
     }
-    return await this.repositories.registerOwner(owner);
+    return await this.repositories.signUpEmployer(employer);
   }
 
   generateOtp() {

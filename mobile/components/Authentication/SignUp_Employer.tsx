@@ -16,7 +16,9 @@ import {
 } from 'native-base';
 import {PASSWORD_RULES} from '../../config.js';
 
-const SignUp_Admin = ({navigation}: any) => {
+const SignUp_Employer = ({navigation}: any) => {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmedPassword, setConfirmedPassword] = useState('');
@@ -26,24 +28,44 @@ const SignUp_Admin = ({navigation}: any) => {
   });
 
   const signUp = () => {
-    if (!validateEmail() || !validatePassword()) {
+    if (!validateName() || !validateEmail() || !validatePassword()) {
       return;
     }
     axios
-      .post(`${LOCAL_HOST_URL}/signUp_admin`, {
+      .post(`${LOCAL_HOST_URL}/signUp_employer`, {
+        firstName,
+        lastName,
         email,
         password,
         status: 'active',
         createDate: new Date(),
       })
       .then(res => {
-        navigation.navigate('SignIn_Admin');
+        navigation.navigate('Home_Employer', {email: email});
       })
       .catch(err => {
         const errMsg = err.response.data.error;
         const error = {type: 'SIGN_UP_ERROR', msg: errMsg};
         setInputErrors(error);
       });
+  };
+
+  const validateName = (): boolean => {
+    if (firstName.length === 0) {
+      setInputErrors({
+        type: 'EMPTY_FIRST_NAME',
+        msg: 'First name is required',
+      });
+      return false;
+    }
+    if (lastName.length === 0) {
+      setInputErrors({
+        type: 'EMPTY_LAST_NAME',
+        msg: 'Last name is required',
+      });
+      return false;
+    }
+    return true;
   };
 
   const validateEmail = (): boolean => {
@@ -99,6 +121,30 @@ const SignUp_Admin = ({navigation}: any) => {
           <Box w="100%" maxWidth="300px" my="6">
             <FormControl
               isRequired
+              isInvalid={inputErrors.type === 'EMPTY_FIRST_NAME'}>
+              <FormControl.Label>First Name</FormControl.Label>
+              <Input
+                onChangeText={val => setFirstName(val)}
+                autoCorrect={false}
+              />
+              <FormControl.ErrorMessage>
+                {inputErrors.msg}
+              </FormControl.ErrorMessage>
+            </FormControl>
+            <FormControl
+              isRequired
+              isInvalid={inputErrors.type === 'EMPTY_LAST_NAME'}>
+              <FormControl.Label>Last Name</FormControl.Label>
+              <Input
+                onChangeText={val => setLastName(val)}
+                autoCorrect={false}
+              />
+              <FormControl.ErrorMessage>
+                {inputErrors.msg}
+              </FormControl.ErrorMessage>
+            </FormControl>
+            <FormControl
+              isRequired
               isInvalid={
                 inputErrors.type === 'EMPTY_EMAIL' ||
                 inputErrors.type === 'INVALID_EMAIL_FORMAT'
@@ -142,7 +188,7 @@ const SignUp_Admin = ({navigation}: any) => {
               <FormControl.Label>Confirm Password</FormControl.Label>
               <Input
                 type="password"
-                onChangeText={val => setPassword(val)}
+                onChangeText={val => setConfirmedPassword(val)}
                 autoCapitalize="none"
                 autoCorrect={false}
               />
@@ -151,7 +197,7 @@ const SignUp_Admin = ({navigation}: any) => {
               </FormControl.ErrorMessage>
             </FormControl>
           </Box>
-          <Button onPress={() => signUp()} w="150" mb={4}>
+          <Button onPress={() => signUp()} w="150" mb={4} borderRadius={20}>
             Sign Up
           </Button>
         </Center>
@@ -175,4 +221,4 @@ const SignUp_Admin = ({navigation}: any) => {
   );
 };
 
-export default SignUp_Admin;
+export default SignUp_Employer;

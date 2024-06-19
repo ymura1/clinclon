@@ -1,4 +1,4 @@
-export interface OwnerInterface {
+export interface EmployerInterface {
     firstName: string,
     lastName: string,
     email: string,
