@@ -20,7 +20,7 @@ const ServiceProvider = (props: any) => {
   const {user, getServiceProviders, ownerEmail, setErrors} = props;
   const navigation = useNavigation();
   const cancelRef = React.useRef(null);
-  const {first_name, last_name, rate, rate_type, status, shifts} = user;
+  const {first_name, last_name, email_address, rate, rate_type, status, shifts} = user;
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const showToast = (description: string) => {
@@ -30,19 +30,19 @@ const ServiceProvider = (props: any) => {
     });
   };
 
-  const deleteUser = () => {
-    // axios
-    //   .delete(`${LOCAL_HOST_URL}/user/${user_name}/${ownerEmail}`)
-    //   .then(() => {
-    //     showToast('User has been deleted!');
-    //     getServiceProviders();
-    //   })
-    //   .catch(() => {
-    //     showToast('Failed to delete user.');
-    //   })
-    //   .finally(() => {
-    //     setDeleteDialogOpen(false);
-    //   });
+  const deleteServiceProvider = () => {
+    axios
+      .delete(`${LOCAL_HOST_URL}/user/${email_address}`)
+      .then(() => {
+        showToast('User has been deleted!');
+        getServiceProviders();
+      })
+      .catch(() => {
+        showToast('Failed to delete user.');
+      })
+      .finally(() => {
+        setDeleteDialogOpen(false);
+      });
   };
 
   return (
@@ -51,6 +51,9 @@ const ServiceProvider = (props: any) => {
         <VStack>
           <Text fontSize={16} bold>
             {first_name} {last_name}
+          </Text>
+          <Text fontSize={12}>
+            {email_address}
           </Text>
         </VStack>
         <Spacer />
@@ -131,7 +134,7 @@ const ServiceProvider = (props: any) => {
                 onPress={() => setDeleteDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button colorScheme="danger" onPress={() => deleteUser()}>
+              <Button colorScheme="danger" onPress={() => deleteServiceProvider()}>
                 Delete
               </Button>
             </Button.Group>

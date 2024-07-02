@@ -21,16 +21,9 @@ class AutheModels {
   }
 
   async isEmployerRegistered(email: string) {
-    const isUserRegistered = await this.repositories.isUserRegistered(email);
-    if (!isUserRegistered) {
-      return;
-    }
     const userId = await this.repositories.getUserId(email);
+    if (!userId) return false;
     return await this.repositories.isUserEmployer(userId);
-  }
-
-  async isOwnerRegistered(email: string) {
-    return await this.repositories.isOwnerRegistered(email);
   }
 
   async isNannyRegistered(username: string) {
@@ -78,18 +71,6 @@ class AutheModels {
     return hashedPassword;
   }
 
-  // async signUpAdmin(owner: OwnerInterface) {
-  //   if (owner.password !== null) {
-  //     const hashedPassword = await bcrypt.hash(
-  //       owner.password,
-  //       Number(process.env.SALT_ROUNDS)
-  //     );
-  //     owner.password = hashedPassword;
-  //   }
-  //   return await this.repositories.registerOwner(owner);
-  // }
-
-  // async signUpEmployer(firstName: string, lastName: string, email: string, password: string) {
   async signUpEmployer(employer: EmployerInterface) {
     if (employer.password !== null) {
       const hashedPassword = await this.generateHashedPassword(employer.password);

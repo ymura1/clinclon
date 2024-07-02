@@ -7,18 +7,6 @@ class AuthControllers {
     this.models = new AutheModels();
   }
 
-  // async signUpAdmin(req: any, res: any) {
-  //   const isRegistered = await this.models.isOwnerRegistered(req.body.email);
-  //   if (isRegistered) {
-  //     res.status(400).json({ error: "This email is already used" });
-  //   } else {
-  //     const response = await this.models.signUpAdmin(req.body);
-  //     response
-  //       ? res.sendStatus(200)
-  //       : res.status(400).json({ error: "Failed to sign up" });
-  //   }
-  // }
-
   async signUpEmployer(req: any, res: any) {
     const isEmployerRegistered = await this.models.isEmployerRegistered(req.body.email);
     if (isEmployerRegistered) {
@@ -56,24 +44,6 @@ class AuthControllers {
     }
   }
 
-  async signInAdmin(req: any, res: any) {
-    const { email, password } = req.body;
-    const isRegistered = await this.models.isOwnerRegistered(email);
-    if (!isRegistered) {
-      res.status(400).json({ error: "Incorrect email address or password" });
-      return;
-    }
-    const isPasswordMatch = await this.models.isAdminPasswordMatch(
-      email,
-      password
-    );
-    if (!isPasswordMatch) {
-      res.status(400).json({ error: "Incorrect email address or password" });
-      return;
-    }
-    res.status(200).send("successfully login");
-  }
-
   async signInEmployer(req: any, res: any) {
     const { email, password } = req.body;
     const isEmployerRegistered = await this.models.isEmployerRegistered(email);
@@ -107,19 +77,19 @@ class AuthControllers {
     res.status(200).send("successfully login");
   }
 
-  async sendOtp(req: any, res: any) {
-    const { email } = req.body;
-    const isRegistered = await this.models.isOwnerRegistered(email);
-    if (!isRegistered) {
-      res
-        .status(400)
-        .json({ error: "This user is not registered. Please sign up" });
-      return;
-    }
-    const otp = await this.models.sendOtp(email);
-    const response = await this.models.storeOtp(email, otp);
-    response ? res.status(200).send({ otp }) : res.sendStatus(400);
-  }
+  // async sendOtp(req: any, res: any) {
+  //   const { email } = req.body;
+  //   const isRegistered = await this.models.isOwnerRegistered(email);
+  //   if (!isRegistered) {
+  //     res
+  //       .status(400)
+  //       .json({ error: "This user is not registered. Please sign up" });
+  //     return;
+  //   }
+  //   const otp = await this.models.sendOtp(email);
+  //   const response = await this.models.storeOtp(email, otp);
+  //   response ? res.status(200).send({ otp }) : res.sendStatus(400);
+  // }
 
   async resendOTP(req: any, res: any) {
     const { email } = req.body;

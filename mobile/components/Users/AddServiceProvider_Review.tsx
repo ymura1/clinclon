@@ -28,10 +28,10 @@ const AddServiceProvider_Review = ({route, navigation}: any) => {
   const submitForm = () => {
     axios
       .post(`${LOCAL_HOST_URL}/addServiceProvider`, {
-        employerEmail,
-        serviceProviderEmail,
         firstName,
         lastName,
+        serviceProviderEmail,
+        employerEmail,
         rate,
         rateType,
         lists,

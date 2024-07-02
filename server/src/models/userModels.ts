@@ -32,25 +32,22 @@ class UserModels {
 
   async addServiceProvider(req: any) {
     const {
-      employerEmail,
-      serviceProviderEmail,
       firstName,
       lastName,
+      serviceProviderEmail,
+      employerEmail,
       rate,
       rateType,
       lists,
     } = req;
     const employerId = await this.repositories.getEmployerId(employerEmail);
-    return await this.repositories.addServiceProvider(
-      employerEmail,
-      firstName,
-      lastName,
-      serviceProviderEmail,
-      rate,
-      rateType,
-      lists,
-      employerId
-    );
+    const userId = await this.repositories.storeServiceProviderInfo(firstName, lastName, serviceProviderEmail)
+    if (!userId) return false;
+    const serviceProviderId = await this.repositories.storeServiceProviderId(userId);
+    if (!serviceProviderId) return false;
+    const s = await this.repositories.storeRateInfo(rate, rateType, employerEmail, employerId, serviceProviderId)
+    if (!s) return false;
+    return await this.repositories.storeSchedule(lists, serviceProviderId);
   }
 
   async addSchedule(userId: string, user: []) {
@@ -77,12 +74,19 @@ class UserModels {
   //   return await this.repositories.isUserRegistered(ownerId, username);
   // }
 
-  // async deleteUser(ownerEmail: string, username: string) {
-  //   const ownerId = await this.getOwnerId(ownerEmail);
-  //   const userId = await this.repositories.getUserId(username);
-  //   await this.repositories.deleteSchedule(userId);
-  //   return await this.repositories.deleteUser(ownerId, userId);
-  // }
+  async deleteServiceProvider(email: string) {
+    return false;
+    /**
+     * delete from application_user
+     * delete from service_provider
+     * delete from employer_provider
+     * delete from service_provider_schedule
+     */
+    // const ownerId = await this.getOwnerId(ownerEmail);
+    // const userId = await this.repositories.getUserId(username);
+    // await this.repositories.deleteSchedule(userId);
+    // return await this.repositories.deleteUser(ownerId, userId);
+  }
 
   async startRecord(req: any) {
     const { username, checkedInTime } = req;

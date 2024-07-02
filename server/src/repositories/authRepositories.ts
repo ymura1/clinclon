@@ -9,13 +9,14 @@ class AuthRepositories {
   }
 
   async isUserRegistered(email: string) {
-    const sql = "SELECT * FROM application_user WHERE email_address = $1;";
+    const sql = "SELECT * FROM users WHERE email_address = $1;";
     return (await this.repositories.queryDB(sql, [email])).rowCount > 0;
   }
 
   async isUserEmployer(id: string) {
-    const sql = "SELECT * FROM employer WHERE id_application_user = $1;";
-    return (await this.repositories.queryDB(sql, [id])).rowCount > 0;
+    const sql = "SELECT service_provider_id FROM user_transaction WHERE service_provider_id = $1;";
+    // const data = (await this.repositories.queryDB(sql, [id])).rows;
+    return (await this.repositories.queryDB(sql, [id])).rows.length === 0;
   }
 
   async isUserProvider(id: string) {
@@ -25,8 +26,8 @@ class AuthRepositories {
   }
 
   async getUserId(email: string) {
-    const sql = "SELECT id FROM application_user WHERE email_address = $1;";
-    return (await this.repositories.queryDB(sql, [email])).rows[0].id;
+    const sql = "SELECT user_id FROM users WHERE email_address = $1;";
+    return (await this.repositories.queryDB(sql, [email])).rows[0].user_id;
   }
 
   async isOwnerRegistered(email: string) {
@@ -82,7 +83,7 @@ class AuthRepositories {
 
   async getEmployerPassword(email: string) {
     const sql =
-      "SELECT password FROM application_user WHERE email_address = $1;";
+      "SELECT password FROM users WHERE email_address = $1;";
     return (await this.repositories.queryDB(sql, [email])).rows[0].password;
   }
 

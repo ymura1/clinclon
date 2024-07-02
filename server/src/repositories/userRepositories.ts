@@ -34,28 +34,36 @@ class UserRepositories {
     return (await this.repositories.queryDB(sql, [ownerId])).rows;
   }
 
-  async getRateInfo(employerId: string) {
-    const sql =
-      "SELECT id_service_provider, rate, rate_type FROM employer_provider WHERE id_employer = $1;";
-    return (await this.repositories.queryDB(sql, [employerId])).rows;
-  }
-
-  async getUserIdFromServiceProvider(serviceProviderId: string) {
-    const sql =
-      "SELECT id, id_application_user FROM service_provider WHERE id = $1;";
-    return (await this.repositories.queryDB(sql, [serviceProviderId])).rows;
-  }
-
-  async getUserInfo(userId: string) {
-    const sql =
-      "SELECT first_name, last_name, email_address, status FROM application_user WHERE id = $1;";
-    return (await this.repositories.queryDB(sql, [userId])).rows;
-  }
-
   async getServiceProviders(employerEmail: string) {
     const sql =
-      "SELECT au2.first_name, au2.last_name, au2.email_address, ep.rate, ep.rate_type FROM application_user au1 INNER JOIN employer e ON au1.id = id_application_user INNER JOIN employer_provider ep ON e.id = ep.id_employer INNER JOIN service_provider sp ON sp.id = ep.id_service_provider INNER JOIN service_provider_schedule sps ON sp.id = sps.service_provider_id INNER JOIN application_user au2 ON au2.id = sp.id_application_user WHERE au1.email_address = $1;";
+      "SELECT au2.first_name, au2.last_name, au2.email_address, au2.status, ep.rate, ep.rate_type, sps.day, sps.start_time, sps.end_time FROM application_user au1 INNER JOIN employer e ON au1.id = id_application_user INNER JOIN employer_provider ep ON e.id = ep.id_employer INNER JOIN service_provider sp ON sp.id = ep.id_service_provider INNER JOIN service_provider_schedule sps ON sp.id = sps.service_provider_id INNER JOIN application_user au2 ON au2.id = sp.id_application_user WHERE au1.email_address = $1;";
     return (await this.repositories.queryDB(sql, [employerEmail])).rows;
+  }
+
+  async storeServiceProviderInfo(firstName: string, lastName: string, email: string) {
+    const sql = "INSERT INTO application_user VALUES (gen_random_uuid(), $1, $2, $3, $4, DEFAULT, CURRENT_TIMESTAMP) RETURNING id;";
+    return (await this.repositories.queryDB(sql, [firstName, lastName, email, null])).rows[0].id;
+  }
+
+  async storeServiceProviderId(userId: string) {
+    const sql = "INSERT INTO service_provider VALUES (gen_random_uuid(), $1) RETURNING id;";
+    return (await this.repositories.queryDB(sql, [userId])).rows[0].id;
+  }
+
+  async storeRateInfo(rate: string, rateType: string, employerEmail: string, employerId: string, serviceProviderId: string) {
+    const sql = "INSERT INTO employer_provider VALUES (gen_random_uuid(), $1, $2, $3, DEFAULT, CURRENT_TIMESTAMP, $4, $5, $6);";
+    await this.repositories.queryDB(sql, [Number(rate), rateType, null, employerEmail, employerId, serviceProviderId]);
+    return true;
+  }
+
+  async storeSchedule(schedules: any[], serviceProviderId: string) {
+    const sql = "INSERT INTO service_provider_schedule VALUES (gen_random_uuid(), $1, $2, $3, $4);";
+    const promises = schedules.map(async ({ day, start, end }) => {
+      await this.repositories.queryDB(sql, [serviceProviderId, day, start, end]);
+    })
+    return await Promise.all(promises).then(() => {
+      return true;
+    })
   }
 
   async getUser(username: string) {
@@ -161,11 +169,21 @@ class UserRepositories {
     return true;
   }
 
-  async deleteUser(ownerId: string, userId: string) {
-    const deleteUserSql =
-      "DELETE FROM users WHERE owner_id = $1 AND user_id = $2;";
-    await this.repositories.queryDB(deleteUserSql, [ownerId, userId]);
-    return true;
+  // async deleteUser(ownerId: string, userId: string) {
+  //   const deleteUserSql =
+  //     "DELETE FROM users WHERE owner_id = $1 AND user_id = $2;";
+  //   await this.repositories.queryDB(deleteUserSql, [ownerId, userId]);
+  //   return true;
+  // }
+
+  async deleteUserInfo(email: string) {
+    const sql = "DELETE FROM application_user WHERE email_address = $1 RETURNING id;";
+    return (await this.repositories.queryDB(sql, [email])).rows[0].id;
+  }
+
+  async deleteServiceProviderId(userId: string) {
+    const sql = "DELETE FROM service_provider WHERE id_application_user = $1 RETURNING;";
+    return await this.repositories.queryDB(sql, [userId]);
   }
 
   async isUserRegistered(ownerId: string, username: string) {

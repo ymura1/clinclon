@@ -30,6 +30,7 @@ class UserControllers {
   // }
 
   async addServiceProvider(req: any, res: any) {
+    console.log('add service provider', req.body)
     const response = await this.models.addServiceProvider(req.body);
     response ? res.sendStatus(200) : res.sendStatus(400);
   }
@@ -45,11 +46,11 @@ class UserControllers {
   //   res.send(response);
   // }
 
-  // async deleteUser(req: any, res: any) {
-  //   const { username, email } = req.params;
-  //   const response = await this.models.deleteUser(email, username);
-  //   response ? res.sendStatus(200) : res.sendStatus(400);
-  // }
+  async deleteServiceProvider(req: any, res: any) {
+    const { email } = req.params;
+    const response = await this.models.deleteServiceProvider(email);
+    response ? res.sendStatus(200) : res.sendStatus(400);
+  }
 
   async startRecord(req: any, res: any) {
     const response = await this.models.startRecord(req.body);

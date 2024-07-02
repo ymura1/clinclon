@@ -14,11 +14,9 @@ class Routes {
         // auth routes
         app.post('/signUp_nanny', this.authControllers.signUpNanny.bind(this.authControllers));
         app.post('/signUp_employer', this.authControllers.signUpEmployer.bind(this.authControllers));
-        // app.post('/signUp_admin', this.authControllers.signUpAdmin.bind(this.authControllers));
-        // app.post('/signIn_admin', this.authControllers.signInAdmin.bind(this.authControllers));
         app.post('/signIn_employer', this.authControllers.signInEmployer.bind(this.authControllers));
         app.post('/signIn_nanny', this.authControllers.signInNanny.bind(this.authControllers));
-        app.post('/user/reset', this.authControllers.sendOtp.bind(this.authControllers));
+        // app.post('/user/reset', this.authControllers.sendOtp.bind(this.authControllers));
         app.post('/user/code', this.authControllers.validateCode.bind(this.authControllers));
         app.post('/user/validate/password', this.authControllers.validatePassword.bind(this.authControllers));
         app.post('/reset/password', this.authControllers.resetPassword.bind(this.authControllers));
@@ -33,7 +31,7 @@ class Routes {
         app.post('/addServiceProvider', this.userControllers.addServiceProvider.bind(this.userControllers));
         // app.post('/edit/user', this.userControllers.editUser.bind(this.userControllers));
         // app.post('/user/duplicate', this.userControllers.isUserRegistered.bind(this.userControllers));
-        // app.delete('/user/:username/:email', this.userControllers.deleteUser.bind(this.userControllers));
+        app.delete('/user/:email', this.userControllers.deleteServiceProvider.bind(this.userControllers));
         app.post('/startRecord', this.userControllers.startRecord.bind(this.userControllers));
         app.post('/endRecord', this.userControllers.endRecord.bind(this.userControllers));
         app.get('/getTodaysRecord/:username', this.userControllers.getTodaysRecord.bind(this.userControllers));

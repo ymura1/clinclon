@@ -1,13 +1,13 @@
 export interface UserInterface {
-  first_name?: string | null;
-  last_name?: string | null;
-  user_name?: string;
-  rate?: number;
-  rate_type?: string | null;
-  status?: string;
+  first_name: string;
+  last_name: string;
+  email_address: string;
+  rate: number;
+  rate_type: string;
+  status: string;
   shifts?: [
     {
-      day: 'string';
+      day: string;
       start_time: string;
       end_time: string;
     },
@@ -16,10 +16,10 @@ export interface UserInterface {
 
 
 export interface RawUserInterface {
-  first_name: string | null;
-  last_name: string | null;
-  user_name: string;
+  first_name: string;
+  last_name: string;
   rate: number;
+  email_address: string;
   rate_type: string | null;
   status: string;
   day: string | null;
