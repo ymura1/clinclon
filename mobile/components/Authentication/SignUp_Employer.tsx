@@ -37,8 +37,6 @@ const SignUp_Employer = ({navigation}: any) => {
         lastName,
         email,
         password,
-        status: 'active',
-        createDate: new Date(),
       })
       .then(res => {
         navigation.navigate('Home_Employer', {email: email});
@@ -212,7 +210,7 @@ const SignUp_Employer = ({navigation}: any) => {
           <Text
             underline
             fontSize="sm"
-            onPress={() => navigation.navigate('SignIn_Admin')}>
+            onPress={() => navigation.navigate('SignIn_Employer')}>
             Sign In
           </Text>
         </Box>

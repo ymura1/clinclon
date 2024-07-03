@@ -14,17 +14,22 @@ import {
   Divider,
   HStack,
 } from 'native-base';
+import validator from 'validator';
 
 const SignIn_Nanny = ({navigation}: any) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [inputErrors, setInputErrors] = useState({type: '', msg: ''});
 
-  const validateUsername = (): boolean => {
+  const validateEmail = (): boolean => {
     let error = {type: '', msg: ''};
-    if (username.length === 0) {
-      error.type = 'EMPTY_USERNAME';
-      error.msg = 'Username is required';
+    if (email.length === 0) {
+      error.type = 'EMPTY_EMAIL';
+      error.msg = 'Email is required';
+    }
+    if (!validator.isEmail(email)) {
+      error.type = 'INVALID_EMAIL_FORMAT';
+      error.msg = 'Email is not valid';
     }
     setInputErrors(error);
     return error.type.length === 0 && error.msg.length === 0;
@@ -41,13 +46,13 @@ const SignIn_Nanny = ({navigation}: any) => {
   };
 
   const signIn = () => {
-    if (!validateUsername() || !validatePassword()) {
+    if (!validateEmail() || !validatePassword()) {
       return;
     }
     axios
-      .post(`${LOCAL_HOST_URL}/signIn_nanny`, {username, password})
+      .post(`${LOCAL_HOST_URL}/signIn_nanny`, {email, password})
       .then(res => {
-        navigation.navigate('Home_nanny', {username});
+        navigation.navigate('Home_nanny', {email});
         setInputErrors({type: '', msg: ''});
       })
       .catch(err => {
@@ -76,10 +81,13 @@ const SignIn_Nanny = ({navigation}: any) => {
           <Box w="100%" maxWidth="300px" my="6">
             <FormControl
               isRequired
-              isInvalid={inputErrors.type === 'EMPTY_USERNAME'}>
-              <FormControl.Label>Username</FormControl.Label>
+              isInvalid={
+                inputErrors.type === 'EMPTY_EMAIL' ||
+                inputErrors.type === 'INVALID_EMAIL_FORMAT'
+              }>
+              <FormControl.Label>Email</FormControl.Label>
               <Input
-                onChangeText={val => setUsername(val)}
+                onChangeText={val => setEmail(val)}
                 autoCapitalize="none"
                 autoCorrect={false}
               />

@@ -20,6 +20,10 @@ class AutheModels {
     this.repositories = new AuthRepositories();
   }
 
+  async isUserRegistered(email: string) {
+    return await this.repositories.isUserRegistered(email);
+  }
+
   async isEmployerRegistered(email: string) {
     const userId = await this.repositories.getUserId(email);
     if (!userId) return false;
@@ -71,12 +75,11 @@ class AutheModels {
     return hashedPassword;
   }
 
-  async signUpEmployer(employer: EmployerInterface) {
-    if (employer.password !== null) {
-      const hashedPassword = await this.generateHashedPassword(employer.password);
-      employer.password = hashedPassword;
-    }
-    return await this.repositories.signUpEmployer(employer);
+  async signUpEmployer(req: any) {
+    const password = req.password;
+    if (password === null) return;
+    const hashedPassword = await this.generateHashedPassword(password);
+    return await this.repositories.signUpEmployer(req, hashedPassword);
   }
 
   generateOtp() {

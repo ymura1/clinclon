@@ -8,8 +8,8 @@ class AuthControllers {
   }
 
   async signUpEmployer(req: any, res: any) {
-    const isEmployerRegistered = await this.models.isEmployerRegistered(req.body.email);
-    if (isEmployerRegistered) {
+    const isUserRegistered = await this.models.isUserRegistered(req.body.email);
+    if (isUserRegistered) {
       res.status(400).json({ error: "This email is already used" });
       return;
     }

@@ -14,8 +14,8 @@ class AuthRepositories {
   }
 
   async isUserEmployer(id: string) {
-    const sql = "SELECT service_provider_id FROM user_transaction WHERE service_provider_id = $1;";
-    // const data = (await this.repositories.queryDB(sql, [id])).rows;
+    const sql =
+      "SELECT service_provider_id FROM user_transaction WHERE service_provider_id = $1;";
     return (await this.repositories.queryDB(sql, [id])).rows.length === 0;
   }
 
@@ -53,13 +53,16 @@ class AuthRepositories {
     return true;
   }
 
-  async signUpEmployer(employer: EmployerInterface) {
-    const {firstName, lastName, email, password } = employer;
-    const sqlApplicationUuser =
-      "INSERT INTO application_user VALUES (gen_random_uuid(), $1, $2, $3, $4, DEFAULT, CURRENT_TIMESTAMP) RETURNING id;";
-    const id = (await this.repositories.queryDB(sqlApplicationUuser, [firstName, lastName, email, password])).rows[0].id;
-    const sqlEmployer = "INSERT INTO employer VALUES (gen_random_uuid(), $1);";
-    await this.repositories.queryDB(sqlEmployer, [id]);
+  async signUpEmployer(req: any, hashedPass: string) {
+    const { firstName, lastName, email } = req;
+    const sql =
+      "INSERT INTO users VALUES (gen_random_uuid(), $1, $2, $3, $4, DEFAULT, CURRENT_TIMESTAMP);";
+    await this.repositories.queryDB(sql, [
+      firstName,
+      lastName,
+      email,
+      hashedPass,
+    ]);
     return true;
   }
 
@@ -82,8 +85,7 @@ class AuthRepositories {
   }
 
   async getEmployerPassword(email: string) {
-    const sql =
-      "SELECT password FROM users WHERE email_address = $1;";
+    const sql = "SELECT password FROM users WHERE email_address = $1;";
     return (await this.repositories.queryDB(sql, [email])).rows[0].password;
   }
 
