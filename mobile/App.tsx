@@ -28,7 +28,6 @@ import EditNanny_username from './components/Users/EditNanny_username';
 import EditNanny_schedule_home from './components/Users/EditNanny_schedule_home';
 import EditNanny_schedule from './components/Users/EditNanny_schedule';
 import EditNanny_review from './components/Users/EditNanny_review';
-import AddNanny_schedule from './components/Users/AddNanny_schedule';
 import ServiceProvider from './components/Users/ServiceProvider';
 import CheckIn_out_complete from './components/Users/CheckIn_out_complete';
 import {Button} from 'react-native';
@@ -190,15 +189,6 @@ function App(): JSX.Element {
           component={ServiceProvider}
           options={{
             title: 'Service Provider',
-            gestureEnabled: false,
-            headerLeft: () => null,
-          }}
-        />
-        <Stack.Screen
-          name="AddNanny_schedule"
-          component={AddNanny_schedule}
-          options={{
-            title: '',
             gestureEnabled: false,
             headerLeft: () => null,
           }}

@@ -16,9 +16,8 @@ class UserRepositories {
   }
 
   async getEmployerId(email: string) {
-    const sql =
-      "SELECT id FROM employer WHERE EXISTS (SELECT id FROM application_user WHERE email_address = $1);";
-    return (await this.repositories.queryDB(sql, [email])).rows[0].id;
+    const sql = "SELECT user_id FROM users WHERE email_address = $1;";
+    return (await this.repositories.queryDB(sql, [email])).rows[0].user_id;
   }
 
   async getServiceProviderId(email: string) {
@@ -40,30 +39,37 @@ class UserRepositories {
     return (await this.repositories.queryDB(sql, [employerEmail])).rows;
   }
 
-  async storeServiceProviderInfo(firstName: string, lastName: string, email: string) {
-    const sql = "INSERT INTO application_user VALUES (gen_random_uuid(), $1, $2, $3, $4, DEFAULT, CURRENT_TIMESTAMP) RETURNING id;";
-    return (await this.repositories.queryDB(sql, [firstName, lastName, email, null])).rows[0].id;
+  async addServiceProviderInfo(
+    firstName: string,
+    lastName: string,
+    email: string
+  ) {
+    const userSql =
+      "INSERT INTO users VALUES (gen_random_uuid(), $1, $2, $3, NULL, DEFAULT, CURRENT_TIMESTAMP) RETURNING user_id;";
+    return (
+      await this.repositories.queryDB(userSql, [firstName, lastName, email])
+    ).rows[0].user_id;
   }
 
-  async storeServiceProviderId(userId: string) {
-    const sql = "INSERT INTO service_provider VALUES (gen_random_uuid(), $1) RETURNING id;";
-    return (await this.repositories.queryDB(sql, [userId])).rows[0].id;
-  }
-
-  async storeRateInfo(rate: string, rateType: string, employerEmail: string, employerId: string, serviceProviderId: string) {
-    const sql = "INSERT INTO employer_provider VALUES (gen_random_uuid(), $1, $2, $3, DEFAULT, CURRENT_TIMESTAMP, $4, $5, $6);";
-    await this.repositories.queryDB(sql, [Number(rate), rateType, null, employerEmail, employerId, serviceProviderId]);
-    return true;
-  }
-
-  async storeSchedule(schedules: any[], serviceProviderId: string) {
-    const sql = "INSERT INTO service_provider_schedule VALUES (gen_random_uuid(), $1, $2, $3, $4);";
-    const promises = schedules.map(async ({ day, start, end }) => {
-      await this.repositories.queryDB(sql, [serviceProviderId, day, start, end]);
-    })
-    return await Promise.all(promises).then(() => {
-      return true;
-    })
+  async addRateInfo(
+    rate: string,
+    rateType: string,
+    employerEmail: string,
+    employerId: string,
+    serviceProviderId: string
+  ) {
+    const sql =
+      "INSERT INTO user_transaction VALUES (gen_random_uuid(), $1, $2, $3, DEFAULT, CURRENT_TIMESTAMP, $4, $5, $6) RETURNING user_transaction_id;";
+    return (
+      await this.repositories.queryDB(sql, [
+        Number(rate),
+        rateType,
+        null,
+        employerEmail,
+        employerId,
+        serviceProviderId,
+      ])
+    ).rows[0].user_transaction_id;
   }
 
   async getUser(username: string) {
@@ -121,11 +127,6 @@ class UserRepositories {
     return true;
   }
 
-  // async getUserId(username: string) {
-  //   const sql = "SELECT user_id from users WHERE user_name = $1;";
-  //   return (await this.repositories.queryDB(sql, [username])).rows[0].user_id;
-  // }
-
   async getInfoForNanny(userId: string) {
     const sql =
       "SELECT rate, rate_type, day, start_time, end_time FROM users u INNER join users_schedule us ON u.user_id = us.user_id where u.user_id = $1;";
@@ -177,12 +178,14 @@ class UserRepositories {
   // }
 
   async deleteUserInfo(email: string) {
-    const sql = "DELETE FROM application_user WHERE email_address = $1 RETURNING id;";
+    const sql =
+      "DELETE FROM application_user WHERE email_address = $1 RETURNING id;";
     return (await this.repositories.queryDB(sql, [email])).rows[0].id;
   }
 
   async deleteServiceProviderId(userId: string) {
-    const sql = "DELETE FROM service_provider WHERE id_application_user = $1 RETURNING;";
+    const sql =
+      "DELETE FROM service_provider WHERE id_application_user = $1 RETURNING;";
     return await this.repositories.queryDB(sql, [userId]);
   }
 
@@ -200,10 +203,17 @@ class UserRepositories {
     return (await this.repositories.queryDB(sql, [userId])).rows;
   }
 
-  async addSchedule(userId: string, schedules: []) {
-    const sql = "INSERT INTO users_schedule VALUES ($1, $2, $3, $4, $5);";
-    const premises = schedules.map(async ({ day, start, end }) => {
-      await this.repositories.queryDB(sql, [uuidv4(), userId, day, start, end]);
+  async addSchedule(userId: string, serviceProviderId: string, schedules: []) {
+    const sql =
+      "INSERT INTO user_schedule VALUES (gen_random_uuid(), $1, $2, $3, $4, $5);";
+    const premises = schedules.map(async ({ day, start_time, end_time }) => {
+      await this.repositories.queryDB(sql, [
+        userId,
+        day,
+        start_time,
+        end_time,
+        serviceProviderId,
+      ]);
     });
     return await Promise.all(premises).then(() => {
       return true;

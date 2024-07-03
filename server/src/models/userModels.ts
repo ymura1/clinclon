@@ -10,10 +10,6 @@ class UserModels {
     this.repositories = new UserRepositories();
   }
 
-  // async getOwnerId(email: string) {
-  //   return await this.repositories.getOwnerId(email);
-  // }
-
   async getEmployerId(email: string) {
     return await this.repositories.getEmployerId(email);
   }
@@ -40,18 +36,16 @@ class UserModels {
       rateType,
       lists,
     } = req;
+    // add to users table
+    const userId = await this.repositories.addServiceProviderInfo(firstName, lastName, serviceProviderEmail);
+    console.log("user id", userId);
+    // add to user_transaction table
     const employerId = await this.repositories.getEmployerId(employerEmail);
-    const userId = await this.repositories.storeServiceProviderInfo(firstName, lastName, serviceProviderEmail)
-    if (!userId) return false;
-    const serviceProviderId = await this.repositories.storeServiceProviderId(userId);
-    if (!serviceProviderId) return false;
-    const s = await this.repositories.storeRateInfo(rate, rateType, employerEmail, employerId, serviceProviderId)
-    if (!s) return false;
-    return await this.repositories.storeSchedule(lists, serviceProviderId);
-  }
-
-  async addSchedule(userId: string, user: []) {
-    return await this.repositories.addSchedule(userId, user);
+    console.log('employer id', employerId)
+    const transactionId = await this.repositories.addRateInfo(rate, rateType, employerEmail, employerId, userId);
+    console.log('transaction', transactionId);
+    // add to user_schedule table
+    return await this.repositories.addSchedule(userId, transactionId, lists);
   }
 
   async editUser(req: any) {

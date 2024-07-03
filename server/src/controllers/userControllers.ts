@@ -30,7 +30,6 @@ class UserControllers {
   // }
 
   async addServiceProvider(req: any, res: any) {
-    console.log('add service provider', req.body)
     const response = await this.models.addServiceProvider(req.body);
     response ? res.sendStatus(200) : res.sendStatus(400);
   }
