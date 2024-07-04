@@ -33,10 +33,9 @@ class UserRepositories {
     return (await this.repositories.queryDB(sql, [ownerId])).rows;
   }
 
-  async getServiceProviders(employerEmail: string) {
-    const sql =
-      "SELECT au2.first_name, au2.last_name, au2.email_address, au2.status, ep.rate, ep.rate_type, sps.day, sps.start_time, sps.end_time FROM application_user au1 INNER JOIN employer e ON au1.id = id_application_user INNER JOIN employer_provider ep ON e.id = ep.id_employer INNER JOIN service_provider sp ON sp.id = ep.id_service_provider INNER JOIN service_provider_schedule sps ON sp.id = sps.service_provider_id INNER JOIN application_user au2 ON au2.id = sp.id_application_user WHERE au1.email_address = $1;";
-    return (await this.repositories.queryDB(sql, [employerEmail])).rows;
+  async getServiceProviders(employerId: string) {
+    const sql = "SELECT u.first_name, u.last_name, u.email_address, u.status, ut.rate, ut.rate_type, us.day, us.start_time, us.end_time FROM users u INNER JOIN user_transaction ut ON u.user_id = ut.service_provider_id INNER JOIN user_schedule us ON ut.service_provider_id = us.service_provider_id WHERE ut.employer_user_id = $1;";
+    return (await this.repositories.queryDB(sql, [employerId])).rows;
   }
 
   async addServiceProviderInfo(
@@ -75,56 +74,6 @@ class UserRepositories {
   async getUser(username: string) {
     const sql = "SELECT * FROM users WHERE user_name=$1;";
     return (await this.repositories.queryDB(sql, [username])).rows;
-  }
-
-  async addServiceProvider(
-    employerEmail: string,
-    firstName: string,
-    lastName: string,
-    email: string,
-    rate: string,
-    rateType: string,
-    list: any,
-    employerId: string
-  ) {
-    const applicationUserSql =
-      "INSERT INTO application_user VALUES (gen_random_uuid(), $1, $2, $3, $4, DEFAULT, CURRENT_TIMESTAMP) RETURNING id;";
-    const userId = (
-      await this.repositories.queryDB(applicationUserSql, [
-        firstName,
-        lastName,
-        email,
-        null,
-      ])
-    ).rows[0].id;
-    const serviceProviderSql =
-      "INSERT INTO service_provider VALUES (gen_random_uuid(), $1) RETURNING id;";
-    const serviceProviderId = (
-      await this.repositories.queryDB(serviceProviderSql, [userId])
-    ).rows[0].id;
-    // save to employer_provider
-    // update_by => employer Email
-    // id, rate, rate_type, currency, status, update_time, update_by, id_employer, id_service_provider
-    const employerProviderSql =
-      "INSERT INTO employer_provider VALUES (gen_random_uuid(), $1, $2, $3, DEFAULT, CURRENT_TIMESTAMP, $4, $5, $6);";
-    await this.repositories.queryDB(employerProviderSql, [
-      rate,
-      rateType,
-      null,
-      employerEmail,
-      employerId,
-      serviceProviderId,
-    ]);
-    // // save schedule
-    const serviceProviderScheduleSql =
-      "INSERT INTO service_provider_schedule VALUES (gen_random_uuid(), $1, $2, $3, $4);";
-    await this.repositories.queryDB(serviceProviderScheduleSql, [
-      serviceProviderId,
-      list.day,
-      list.start_time,
-      list.end_time,
-    ]);
-    return true;
   }
 
   async getInfoForNanny(userId: string) {
@@ -170,13 +119,6 @@ class UserRepositories {
     return true;
   }
 
-  // async deleteUser(ownerId: string, userId: string) {
-  //   const deleteUserSql =
-  //     "DELETE FROM users WHERE owner_id = $1 AND user_id = $2;";
-  //   await this.repositories.queryDB(deleteUserSql, [ownerId, userId]);
-  //   return true;
-  // }
-
   async deleteUserInfo(email: string) {
     const sql =
       "DELETE FROM application_user WHERE email_address = $1 RETURNING id;";
@@ -204,14 +146,15 @@ class UserRepositories {
   }
 
   async addSchedule(userId: string, serviceProviderId: string, schedules: []) {
+    console.log(userId, serviceProviderId, schedules)
     const sql =
       "INSERT INTO user_schedule VALUES (gen_random_uuid(), $1, $2, $3, $4, $5);";
-    const premises = schedules.map(async ({ day, start_time, end_time }) => {
+    const premises = schedules.map(async ({ day, start, end }) => {
       await this.repositories.queryDB(sql, [
         userId,
         day,
-        start_time,
-        end_time,
+        start,
+        end,
         serviceProviderId,
       ]);
     });

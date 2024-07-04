@@ -19,7 +19,8 @@ class UserModels {
   }
 
   async getServiceProviders(employerEmail: string) {
-    return await this.repositories.getServiceProviders(employerEmail);
+    const employerId = await this.repositories.getEmployerId(employerEmail);
+    return await this.repositories.getServiceProviders(employerId);
   }
 
   async getUser(username: string) {
@@ -36,15 +37,9 @@ class UserModels {
       rateType,
       lists,
     } = req;
-    // add to users table
     const userId = await this.repositories.addServiceProviderInfo(firstName, lastName, serviceProviderEmail);
-    console.log("user id", userId);
-    // add to user_transaction table
     const employerId = await this.repositories.getEmployerId(employerEmail);
-    console.log('employer id', employerId)
     const transactionId = await this.repositories.addRateInfo(rate, rateType, employerEmail, employerId, userId);
-    console.log('transaction', transactionId);
-    // add to user_schedule table
     return await this.repositories.addSchedule(userId, transactionId, lists);
   }
 
