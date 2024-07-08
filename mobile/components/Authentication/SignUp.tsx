@@ -16,8 +16,10 @@ import {
 } from 'native-base';
 import {PASSWORD_RULES} from '../../config.js';
 
-const SignUp_Nanny = ({navigation}: any) => {
-  const [username, setUsername] = useState('');
+const SignUp = ({navigation}: any) => {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmedPassword, setConfirmedPassword] = useState('');
   const [inputErrors, setInputErrors] = useState({
@@ -26,16 +28,18 @@ const SignUp_Nanny = ({navigation}: any) => {
   });
 
   const signUp = () => {
-    if (!validateUsername() || !validatePassword()) {
+    if (!validateName() || !validateEmail() || !validatePassword()) {
       return;
     }
     axios
-      .post(`${LOCAL_HOST_URL}/signUp_nanny`, {
-        username,
+      .post(`${LOCAL_HOST_URL}/signUp`, {
+        firstName,
+        lastName,
+        email,
         password,
       })
-      .then(() => {
-        navigation.navigate('Home_nanny', {username});
+      .then(res => {
+        navigation.navigate('Home_Employer', {email: email});
       })
       .catch(err => {
         const errMsg = err.response.data.error;
@@ -44,33 +48,65 @@ const SignUp_Nanny = ({navigation}: any) => {
       });
   };
 
-  const validateUsername = (): boolean => {
-    let error = {type: '', msg: ''};
-    if (username.length === 0) {
-      error.type = 'EMPTY_USERNAME';
-      error.msg = 'Username is required';
+  const validateName = (): boolean => {
+    if (firstName.length === 0) {
+      setInputErrors({
+        type: 'EMPTY_FIRST_NAME',
+        msg: 'First name is required',
+      });
+      return false;
     }
-    setInputErrors(error);
-    return error.type.length === 0 && error.msg.length === 0;
+    if (lastName.length === 0) {
+      setInputErrors({
+        type: 'EMPTY_LAST_NAME',
+        msg: 'Last name is required',
+      });
+      return false;
+    }
+    return true;
   };
 
-  const validatePassword = (): boolean => {
-    let error = {type: '', msg: ''};
+  const validateEmail = (): boolean => {
+    if (email.length === 0) {
+      setInputErrors({
+        type: 'EMPTY_EMAIL',
+        msg: 'Email is required',
+      });
+      return false;
+    }
+    if (!validator.isEmail(email)) {
+      setInputErrors({
+        type: 'INVALID_EMAIL_FORMAT',
+        msg: 'Email is not valid',
+      });
+      return false;
+    }
+    return true;
+  };
+
+  const validatePassword = () => {
     if (!password.length || !confirmedPassword.length) {
-      error.type = 'EMPTY_PASSWORD';
-      error.msg = 'Password is required';
+      setInputErrors({
+        type: 'EMPTY_PASSWORD',
+        msg: 'Password is required',
+      });
+      return false;
     }
     if (!validator.isStrongPassword(password, PASSWORD_RULES)) {
-      error.type = 'WEAK_PASSWORD';
-      error.msg =
-        'Password must contain 8 characters, 1 number, 1 upper, 1 lower';
+      setInputErrors({
+        type: 'WEAK_PASSWORD',
+        msg: 'Password must contain 8 characters, 1 number, 1 upper, 1 lower',
+      });
+      return false;
     }
     if (password !== confirmedPassword) {
-      error.type = 'PASSWORD_MISMATCH';
-      error.msg = 'Password does not match';
+      setInputErrors({
+        type: 'PASSWORD_MISMATCH',
+        msg: 'Password does not match',
+      });
+      return false;
     }
-    setInputErrors(error);
-    return error.type.length === 0 && error.msg.length === 0;
+    return true;
   };
 
   const alertSignUpError = () => {
@@ -88,16 +124,42 @@ const SignUp_Nanny = ({navigation}: any) => {
     <NativeBaseProvider>
       {inputErrors.type === 'SIGN_UP_ERROR' && alertSignUpError()}
       <Box m="5%">
-        <Heading size="md">Password setup</Heading>
+        <Heading size="md">Sign Up</Heading>
         <Center>
           <Box w="100%" maxWidth="300px" my="6">
             <FormControl
               isRequired
-              isInvalid={inputErrors.type === 'EMPTY_USERNAME'}>
-              <FormControl.Label>Username</FormControl.Label>
+              isInvalid={inputErrors.type === 'EMPTY_FIRST_NAME'}>
+              <FormControl.Label>First Name</FormControl.Label>
               <Input
-                onChangeText={val => setUsername(val)}
-                placeholder="Type your username that your owner set"
+                onChangeText={val => setFirstName(val)}
+                autoCorrect={false}
+              />
+              <FormControl.ErrorMessage>
+                {inputErrors.msg}
+              </FormControl.ErrorMessage>
+            </FormControl>
+            <FormControl
+              isRequired
+              isInvalid={inputErrors.type === 'EMPTY_LAST_NAME'}>
+              <FormControl.Label>Last Name</FormControl.Label>
+              <Input
+                onChangeText={val => setLastName(val)}
+                autoCorrect={false}
+              />
+              <FormControl.ErrorMessage>
+                {inputErrors.msg}
+              </FormControl.ErrorMessage>
+            </FormControl>
+            <FormControl
+              isRequired
+              isInvalid={
+                inputErrors.type === 'EMPTY_EMAIL' ||
+                inputErrors.type === 'INVALID_EMAIL_FORMAT'
+              }>
+              <FormControl.Label>Email Address</FormControl.Label>
+              <Input
+                onChangeText={val => setEmail(val)}
                 autoCapitalize="none"
                 autoCorrect={false}
               />
@@ -143,7 +205,7 @@ const SignUp_Nanny = ({navigation}: any) => {
               </FormControl.ErrorMessage>
             </FormControl>
           </Box>
-          <Button onPress={() => signUp()} w="150" mb={4}>
+          <Button onPress={() => signUp()} w="150" mb={4} borderRadius={20}>
             Sign Up
           </Button>
         </Center>
@@ -158,7 +220,7 @@ const SignUp_Nanny = ({navigation}: any) => {
           <Text
             underline
             fontSize="sm"
-            onPress={() => navigation.navigate('SignIn_Nanny')}>
+            onPress={() => navigation.navigate('SignIn')}>
             Sign In
           </Text>
         </Box>
@@ -167,4 +229,4 @@ const SignUp_Nanny = ({navigation}: any) => {
   );
 };
 
-export default SignUp_Nanny;
+export default SignUp;

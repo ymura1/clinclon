@@ -8,6 +8,24 @@ class AuthRepositories {
     this.repositories = new Repositories();
   }
 
+  async signUp(req: any, hashedPass: string) {
+    const { firstName, lastName, email } = req;
+    const sql =
+      "INSERT INTO users VALUES (gen_random_uuid(), $1, $2, $3, $4, DEFAULT, CURRENT_TIMESTAMP);";
+    await this.repositories.queryDB(sql, [
+      firstName,
+      lastName,
+      email,
+      hashedPass,
+    ]);
+    return true;
+  }
+
+  async getPassword(email: string) {
+    const sql = "SELECT password FROM users WHERE email_address = $1;";
+    return (await this.repositories.queryDB(sql, [email])).rows[0].password;
+  }
+
   async isUserRegistered(email: string) {
     const sql = "SELECT * FROM users WHERE email_address = $1;";
     return (await this.repositories.queryDB(sql, [email])).rowCount > 0;
@@ -51,54 +69,6 @@ class AuthRepositories {
     const sql = "UPDATE users SET user_password = $1 WHERE user_name = $2;";
     await this.repositories.queryDB(sql, [password, username]);
     return true;
-  }
-
-  async signUpEmployer(req: any, hashedPass: string) {
-    const { firstName, lastName, email } = req;
-    const sql =
-      "INSERT INTO users VALUES (gen_random_uuid(), $1, $2, $3, $4, DEFAULT, CURRENT_TIMESTAMP);";
-    await this.repositories.queryDB(sql, [
-      firstName,
-      lastName,
-      email,
-      hashedPass,
-    ]);
-    return true;
-  }
-
-  async registerOwner(owner: any) {
-    const { email, status, createDate, password } = owner;
-    const sql =
-      "INSERT INTO owners VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6);";
-    return (
-      (
-        await this.repositories.queryDB(sql, [
-          null,
-          null,
-          email,
-          password,
-          status,
-          createDate,
-        ])
-      ).rowCount > 0
-    );
-  }
-
-  async getEmployerPassword(email: string) {
-    const sql = "SELECT password FROM users WHERE email_address = $1;";
-    return (await this.repositories.queryDB(sql, [email])).rows[0].password;
-  }
-
-  async getOwnerPassword(email: string) {
-    const sql = "SELECT owner_password FROM owners WHERE email_address = $1;";
-    return (await this.repositories.queryDB(sql, [email])).rows[0]
-      .owner_password;
-  }
-
-  async getNannyPassword(username: string) {
-    const sql = "SELECT user_password FROM users WHERE user_name = $1;";
-    return (await this.repositories.queryDB(sql, [username])).rows[0]
-      .user_password;
   }
 
   async storeOtp(otp: number, ownerId: string) {

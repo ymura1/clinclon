@@ -11,7 +11,7 @@ class UserRepositories {
 
   // ---------------------  Owners  -------------------------------
   async getUserId(email: string) {
-    const sql = "SELECT id FROM application_user WHERE email_address = $1;";
+    const sql = "SELECT user_id FROM users WHERE email_address = $1;";
     return (await this.repositories.queryDB(sql, [email])).rows[0].id;
   }
 
@@ -43,11 +43,17 @@ class UserRepositories {
     lastName: string,
     email: string
   ) {
-    const userSql =
+    const sql =
       "INSERT INTO users VALUES (gen_random_uuid(), $1, $2, $3, NULL, DEFAULT, CURRENT_TIMESTAMP) RETURNING user_id;";
     return (
-      await this.repositories.queryDB(userSql, [firstName, lastName, email])
+      await this.repositories.queryDB(sql, [firstName, lastName, email])
     ).rows[0].user_id;
+  }
+
+  async updateServiceProviderInfo(firstName: string, lastName: string, email: string, status: string) {
+    const sql = "UPDATE users SET first_name = $1, last_name = $2, email_address = $3, status = $4 WHERE user_id = $5;";
+    await this.repositories.queryDB(sql, [firstName, lastName, email, status]);
+    return true;
   }
 
   async addRateInfo(
@@ -69,6 +75,16 @@ class UserRepositories {
         serviceProviderId,
       ])
     ).rows[0].user_transaction_id;
+  }
+
+  async updateRateInfo(rate: string, rateType: string, status: string, serviceProviderId: string) {
+    const sql = "UPDATE user_transaction SET rate = $1, rate_type = $2, status = $3, update_date = CURRENT_TIMESTAMP WHERE service_provider_id = $4;";
+    await this.repositories.queryDB(sql, [rate, rateType, status, serviceProviderId]);
+    return true;
+  }
+
+  async updateSchedule() {
+    const sql = "UPDATE user_schedule SET "
   }
 
   async getUser(username: string) {
@@ -146,7 +162,6 @@ class UserRepositories {
   }
 
   async addSchedule(userId: string, serviceProviderId: string, schedules: []) {
-    console.log(userId, serviceProviderId, schedules)
     const sql =
       "INSERT INTO user_schedule VALUES (gen_random_uuid(), $1, $2, $3, $4, $5);";
     const premises = schedules.map(async ({ day, start, end }) => {

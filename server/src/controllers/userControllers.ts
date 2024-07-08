@@ -34,10 +34,12 @@ class UserControllers {
     response ? res.sendStatus(200) : res.sendStatus(400);
   }
 
-  // async editUser(req: any, res: any) {
-  //   const response = await this.models.addServiceProvider(req.body);
-  //   response ? res.sendStatus(200) : res.sendStatus(400);
-  // }
+  async editServiceProvider(req: any, res: any) {
+    console.log(req)
+    const response = await this.models.editServiceProvider(req.body);
+    // const response = await this.models.addServiceProvider(req.body);
+    // response ? res.sendStatus(200) : res.sendStatus(400);
+  }
 
   // async isUserRegistered(req: any, res: any) {
   //   const { ownerEmail, username } = req.body;

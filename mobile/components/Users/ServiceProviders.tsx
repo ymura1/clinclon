@@ -18,7 +18,6 @@ const ServiceProviders = ({employerEmail, setErrors}: any) => {
     axios
       .get(`${LOCAL_HOST_URL}/getServiceProviders/${employerEmail}`)
       .then(res => {
-        console.log(res)
         const data = processUserData(res.data);
         setUsers(data);
       })
@@ -28,7 +27,6 @@ const ServiceProviders = ({employerEmail, setErrors}: any) => {
   };
 
   const processUserData = (users: RawUserInterface[]): UserInterface[] => {
-    console.log('service providers before process', users)
     const data = users.reduce((a, b) => {
       const found = a.find((e: RawUserInterface) => e.email_address == b.email_address);
       const item = {day: b.day, start_time: b.start_time, end_time: b.end_time};

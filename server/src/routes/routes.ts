@@ -12,10 +12,8 @@ class Routes {
 
     applyRouting(app: any) {
         // auth routes
-        app.post('/signUp_nanny', this.authControllers.signUpNanny.bind(this.authControllers));
-        app.post('/signUp_employer', this.authControllers.signUpEmployer.bind(this.authControllers));
-        app.post('/signIn_employer', this.authControllers.signInEmployer.bind(this.authControllers));
-        app.post('/signIn_nanny', this.authControllers.signInNanny.bind(this.authControllers));
+        app.post('/signUp', this.authControllers.signUp.bind(this.authControllers));
+        app.post('/signIn', this.authControllers.signIn.bind(this.authControllers));
         // app.post('/user/reset', this.authControllers.sendOtp.bind(this.authControllers));
         app.post('/user/code', this.authControllers.validateCode.bind(this.authControllers));
         app.post('/user/validate/password', this.authControllers.validatePassword.bind(this.authControllers));
@@ -29,7 +27,7 @@ class Routes {
         app.get('/history/:username', this.userControllers.getHistory.bind(this.userControllers));
         // app.post('/user', this.userControllers.addUser.bind(this.userControllers));
         app.post('/addServiceProvider', this.userControllers.addServiceProvider.bind(this.userControllers));
-        // app.post('/edit/user', this.userControllers.editUser.bind(this.userControllers));
+        app.post('/edit/serviceProvider', this.userControllers.editServiceProvider.bind(this.userControllers));
         // app.post('/user/duplicate', this.userControllers.isUserRegistered.bind(this.userControllers));
         app.delete('/user/:email', this.userControllers.deleteServiceProvider.bind(this.userControllers));
         app.post('/startRecord', this.userControllers.startRecord.bind(this.userControllers));

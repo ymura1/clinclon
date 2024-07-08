@@ -8,26 +8,24 @@
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import SignUp_Employer from './components/Authentication/SignUp_Employer';
-import SignUp_Nanny from './components/Authentication/SignUp_Nanny';
-import SignIn_Employer from './components/Authentication/SignIn_Employer';
+import SignUp from './components/Authentication/SignUp';
+import SignIn from './components/Authentication/SignIn';
 import ServiceProviders from './components/Users/ServiceProviders';
-import Start from './components/Start';
 import Home_nanny from './components/Home_nanny';
 import ForgotPassword from './components/Authentication/ForgotPassword';
 import ResetPassword from './components/Authentication/ResetPassword';
 import VerifyOTP from './components/Authentication/VerifyOTP';
-import SignIn_Nanny from './components/Authentication/SignIn_Nanny';
 import Home_Employer from './components/Home_Employer';
 import Account from './components/Users/Account';
 import Account_Admin from './components/Users/Account_Admin';
 import AddServiceProvider_1 from './components/Users/AddServiceProvider_1';
 import AddServiceProvider_2 from './components/Users/AddServiceProvider_2';
 import AddServiceProvider_Review from './components/Users/AddServiceProvider_Review';
-import EditNanny_username from './components/Users/EditNanny_username';
-import EditNanny_schedule_home from './components/Users/EditNanny_schedule_home';
-import EditNanny_schedule from './components/Users/EditNanny_schedule';
-import EditNanny_review from './components/Users/EditNanny_review';
+import EditServiceProvider_1 from './components/Users/EditServiceProvider_1';
+import EditServiceProvider_2 from './components/Users/EditServiceProvider_2';
+import EditServiceProvider_3 from './components/Users/EditServiceProvider_3';
+import EditServiceProvider_review from './components/Users/EditServiceProvider_review';
+import EditAddServiceProvider from './components/Users/EditAddServiceProvider';
 import ServiceProvider from './components/Users/ServiceProvider';
 import CheckIn_out_complete from './components/Users/CheckIn_out_complete';
 import {Button} from 'react-native';
@@ -38,26 +36,15 @@ function App(): JSX.Element {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name="Start" component={Start} options={{title: ''}} />
         <Stack.Screen
-          name="SignUp_Employer"
-          component={SignUp_Employer}
+          name="SignIn"
+          component={SignIn}
+          options={{title: '', gestureEnabled: false}}
+        />
+        <Stack.Screen
+          name="SignUp"
+          component={SignUp}
           options={{title: '', gestureEnabled: false, headerLeft: () => null}}
-        />
-        <Stack.Screen
-          name="SignUp_Nanny"
-          component={SignUp_Nanny}
-          options={{title: '', gestureEnabled: false}}
-        />
-        <Stack.Screen
-          name="SignIn_Employer"
-          component={SignIn_Employer}
-          options={{title: '', gestureEnabled: false}}
-        />
-        <Stack.Screen
-          name="SignIn_Nanny"
-          component={SignIn_Nanny}
-          options={{title: '', gestureEnabled: false}}
         />
         <Stack.Screen
           name="ForgotPassword"
@@ -153,33 +140,33 @@ function App(): JSX.Element {
           }}
         />
         <Stack.Screen
-          name="EditNanny_username"
-          component={EditNanny_username}
-          options={{title: 'Edit Nanny', gestureEnabled: false}}
+          name="EditServiceProvider_1"
+          component={EditServiceProvider_1}
+          options={{title: 'Edit Service Provider', gestureEnabled: false}}
         />
         <Stack.Screen
-          name="EditNanny_schedule_home"
-          component={EditNanny_schedule_home}
+          name="EditServiceProvider_2"
+          component={EditServiceProvider_2}
           options={{
-            title: 'Edit Nanny',
+            title: 'Edit Service Provider',
             gestureEnabled: false,
             headerLeft: () => null,
           }}
         />
         <Stack.Screen
-          name="EditNanny_schedule"
-          component={EditNanny_schedule}
+          name="EditServiceProvider_3"
+          component={EditServiceProvider_3}
           options={{
-            title: 'Edit Nanny',
+            title: 'Edit Service Provider',
             gestureEnabled: false,
             headerLeft: () => null,
           }}
         />
         <Stack.Screen
-          name="EditNanny_review"
-          component={EditNanny_review}
+          name="EditServiceProvider_review"
+          component={EditServiceProvider_review}
           options={{
-            title: 'Edit Nanny',
+            title: 'Edit Service Provider',
             gestureEnabled: false,
             headerLeft: () => null,
           }}
@@ -196,6 +183,11 @@ function App(): JSX.Element {
         <Stack.Screen
           name="CheckIn_out_complete"
           component={CheckIn_out_complete}
+          options={{title: '', gestureEnabled: false, headerLeft: () => null}}
+        />
+        <Stack.Screen
+          name="EditAddServiceProvider"
+          component={EditAddServiceProvider}
           options={{title: '', gestureEnabled: false, headerLeft: () => null}}
         />
       </Stack.Navigator>

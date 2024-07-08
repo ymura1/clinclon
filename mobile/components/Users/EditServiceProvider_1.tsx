@@ -9,11 +9,22 @@ import {
   HStack,
   Center,
 } from 'native-base';
+import validator from 'validator';
 
-const EditNanny_username = ({route, navigation}: any) => {
+const EditServiceProvider_1 = ({route, navigation}: any) => {
   const {ownerEmail, getServiceProviders, setErrors} = route.params;
-  const {user_name, rate, rate_type, status, shifts} = route.params.user;
-  const [updatedUsername, setUpdatedUsername] = useState(user_name);
+  const {
+    first_name,
+    last_name,
+    email_address,
+    rate,
+    rate_type,
+    status,
+    shifts,
+  } = route.params.user;
+  const [updatedFirstName, setUpdatedFirstName] = useState(first_name);
+  const [updatedLastName, setUpdatedLastName] = useState(last_name);
+  const [updatedEmail, setUpdatedEmail] = useState(email_address);
   const [updatedRate, setUpdatedRate] = useState<number>(rate);
   const [updatedRateType, setUpdatedRateType] = useState(rate_type);
   const [updatedStatus, setUpdatedStatus] = useState(status);
@@ -24,9 +35,21 @@ const EditNanny_username = ({route, navigation}: any) => {
 
   const validateInput = async () => {
     let error = {type: '', msg: ''};
-    if (updatedUsername.length === 0) {
-      error.type = 'EMPTY_USERNAME';
-      error.msg = 'Username is required';
+    if (updatedFirstName.length === 0) {
+      error.type = 'EMPTY_FIRST_NAME';
+      error.msg = 'First name is required';
+    }
+    if (updatedLastName.length === 0) {
+      error.type = 'EMPTY_LAST_NAME';
+      error.msg = 'Last name is required';
+    }
+    if (updatedEmail.length === 0) {
+      error.type = 'EMPTY_EMAIL';
+      error.msg = 'Email Address is required';
+    }
+    if (!validator.isEmail(updatedEmail)) {
+      error.type = 'INVALID_EMAIL';
+      error.msg = 'Email format is invalid';
     }
     if (updatedStatus.length === 0) {
       error.type = 'EMPTY_STATUS';
@@ -47,20 +70,39 @@ const EditNanny_username = ({route, navigation}: any) => {
     return error.type.length === 0 && error.msg.length === 0;
   };
 
+  const setParams = () => {
+    let params: any = {};
+    if (updatedFirstName !== first_name) {
+      params.first_name = updatedFirstName;
+    }
+    if (updatedLastName !== last_name) {
+      params.last_name = updatedLastName;
+    }
+    if (updatedEmail !== email_address) {
+      params.email_address = updatedEmail;
+    }
+    if (updatedRate !== rate) {
+      params.rate = updatedRate;
+    }
+    if (updatedRateType !== rate_type) {
+      params.rate_type = updatedRateType;
+    }
+    if (updatedStatus !== status) {
+      params.status = updatedStatus;
+    }
+    return params;
+  }
+
   const navigateToNext = () => {
     if (!validateInput()) return;
-    navigation.navigate('EditNanny_schedule_home', {
-      ownerEmail,
-      user_name,
-      updatedUsername,
-      updatedRate,
-      updatedRateType,
-      updatedStatus,
+    const params = setParams();
+    navigation.navigate('EditServiceProvider_2', {
+      params,
       shifts,
-      setErrors,
       getServiceProviders,
+      setErrors,
     });
-  }
+  };
 
   return (
     <NativeBaseProvider>
@@ -68,13 +110,42 @@ const EditNanny_username = ({route, navigation}: any) => {
         <Center mt={10}>
           <FormControl
             isRequired
-            isInvalid={inputErrors.type == 'EMPTY_USERNAME'}>
-            <FormControl.Label>User Name</FormControl.Label>
+            isInvalid={inputErrors.type == 'EMPTY_FIRST_NAME'}>
+            <FormControl.Label>First Name</FormControl.Label>
             <Input
-              onChangeText={val => setUpdatedUsername(val)}
+              onChangeText={val => setUpdatedFirstName(val)}
+              autoCorrect={false}
+              defaultValue={first_name}
+            />
+            <FormControl.ErrorMessage>
+              {inputErrors.msg}
+            </FormControl.ErrorMessage>
+          </FormControl>
+          <FormControl
+            isRequired
+            isInvalid={inputErrors.type == 'EMPTY_LAST_NAME'}>
+            <FormControl.Label>Last Name</FormControl.Label>
+            <Input
+              onChangeText={val => setUpdatedLastName(val)}
+              autoCorrect={false}
+              defaultValue={last_name}
+            />
+            <FormControl.ErrorMessage>
+              {inputErrors.msg}
+            </FormControl.ErrorMessage>
+          </FormControl>
+          <FormControl
+            isRequired
+            isInvalid={
+              inputErrors.type == 'EMPTY_EMAIL' ||
+              inputErrors.type === 'INVALID_EMAIL'
+            }>
+            <FormControl.Label>Email Address</FormControl.Label>
+            <Input
+              onChangeText={val => setUpdatedEmail(val)}
               autoCapitalize="none"
               autoCorrect={false}
-              defaultValue={user_name}
+              defaultValue={email_address}
             />
             <FormControl.ErrorMessage>
               {inputErrors.msg}
@@ -131,4 +202,4 @@ const EditNanny_username = ({route, navigation}: any) => {
   );
 };
 
-export default EditNanny_username;
+export default EditServiceProvider_1;

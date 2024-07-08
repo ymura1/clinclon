@@ -7,69 +7,27 @@ class AuthControllers {
     this.models = new AutheModels();
   }
 
-  async signUpEmployer(req: any, res: any) {
+  async signUp(req: any, res: any) {
     const isUserRegistered = await this.models.isUserRegistered(req.body.email);
     if (isUserRegistered) {
       res.status(400).json({ error: "This email is already used" });
       return;
     }
-    const response = await this.models.signUpEmployer(req.body);
+    const response = await this.models.signUp(req.body);
     response
     ? res.sendStatus(200)
     : res.status(400).json({ error: "Failed to sign up" });
   }
 
-  async signUpNanny(req: any, res: any) {
-    const { username, password } = req.body;
-    const isRegistered = await this.models.isNannyRegistered(username);
-    if (!isRegistered) {
-      res.status(400).json({ error: "This username is not registered" });
-      return;
-    }
-    if (isRegistered) {
-      const isPasswordRegistered = await this.models.isPasswordRegistered(
-        username
-      );
-      if (isPasswordRegistered) {
-        res.status(400).json({
-          error:
-            "Password for this user already exists. You can reset the password when you forget.",
-        });
-      } else {
-        const response = await this.models.setNannyPassword(username, password);
-        response
-          ? res.sendStatus(200)
-          : res.status(400).json({ error: "Failed to set password" });
-      }
-    }
-  }
-
-  async signInEmployer(req: any, res: any) {
+  async signIn(req: any, res: any) {
     const { email, password } = req.body;
-    const isEmployerRegistered = await this.models.isEmployerRegistered(email);
-    if (!isEmployerRegistered) {
+    console.log(email, password)
+    const isUserRegistered = await this.models.isUserRegistered(email);
+    if (!isUserRegistered) {
       res.status(400).json({ error: "Incorrect email address or password" });
       return;
     }
-    const isPasswordMatch = await this.models.isEmployerPasswordMatch(email, password);
-    if (!isPasswordMatch) {
-      res.status(400).json({ error: "Incorrect email address or password" });
-      return;
-    }
-    res.status(200).send("successfully login");
-  }
-
-  async signInNanny(req: any, res: any) {
-    const { username, password } = req.body;
-    const isRegistered = await this.models.isNannyRegistered(username);
-    if (!isRegistered) {
-      res.status(400).json({ error: "Incorrect username or password" });
-      return;
-    }
-    const isPasswordMatch = await this.models.isNannyPasswordMatch(
-      username,
-      password
-    );
+    const isPasswordMatch = await this.models.isPasswordMatch(email, password);
     if (!isPasswordMatch) {
       res.status(400).json({ error: "Incorrect email address or password" });
       return;

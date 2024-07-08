@@ -43,6 +43,37 @@ class UserModels {
     return await this.repositories.addSchedule(userId, transactionId, lists);
   }
 
+  async editServiceProvider(req: any) {
+    // Frances wants to change
+    const { email_address, updatedFirstName, updatedLastName, updatedEmail, updatedStatus } = req;
+    // update users table
+    const userId = await this.repositories.getUserId(email_address);
+    await this.repositories.updateServiceProviderInfo(updatedFirstName, updatedLastName, updatedEmail, updatedStatus);
+    // update user_transaction table
+    // update user_schedule table
+  }
+
+// Frances => Andria
+// Frances => Amit
+// Yui => Andria
+// Amit => Yui
+
+
+// User
+// 	1. Frances
+// 	2. Andria
+// 	3. Yui
+// 	4. Amit
+
+// User_transaction
+// 	id: 1, rate: 20, sp_id: 2, ep_id: 1
+// 	id: 2, rate: 10, sp_id: 4, ep_id: 1
+// 	id: 3, rate: 20, sp_id: 2, ep_id: 3
+// 	id: 4, rate: 25, sp_id: 3, ep_id: 4
+
+// User_schedule
+// 	id: 1, sp_id: 2, ut_id: 1, day: Mon, start_time: 9:00AM, end_time: 5:00PM
+
   async editUser(req: any) {
     const userId = await this.repositories.getUserId(req.user_name);
     await this.repositories.editUser(req, userId);

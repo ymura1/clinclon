@@ -24,6 +24,13 @@ class AutheModels {
     return await this.repositories.isUserRegistered(email);
   }
 
+  async signUp(req: any) {
+    const password = req.password;
+    if (password === null) return;
+    const hashedPassword = await this.generateHashedPassword(password);
+    return await this.repositories.signUp(req, hashedPassword);
+  }
+
   async isEmployerRegistered(email: string) {
     const userId = await this.repositories.getUserId(email);
     if (!userId) return false;
@@ -34,23 +41,8 @@ class AutheModels {
     return await this.repositories.isNannyRegistered(username);
   }
 
-  async isAdminPasswordMatch(email: string, password: string) {
-    const hashedPassword = await this.repositories.getOwnerPassword(email);
-    const isMatch = await bcrypt.compare(password, hashedPassword);
-    return isMatch;
-  }
-
-  async isEmployerPasswordMatch(email: string, password: string) {
-    const hashedPassword = await this.repositories.getEmployerPassword(email);
-    const isMatch = await bcrypt.compare(password, hashedPassword);
-    return isMatch;
-  }
-
-  async isNannyPasswordMatch(username: string, password: string) {
-    const hashedPassword = await this.repositories.getNannyPassword(username);
-    if (hashedPassword === null) {
-      return false;
-    }
+  async isPasswordMatch(email: string, password: string) {
+    const hashedPassword = await this.repositories.getPassword(email);
     const isMatch = await bcrypt.compare(password, hashedPassword);
     return isMatch;
   }
@@ -73,13 +65,6 @@ class AutheModels {
       Number(process.env.SALT_ROUNDS)
     );
     return hashedPassword;
-  }
-
-  async signUpEmployer(req: any) {
-    const password = req.password;
-    if (password === null) return;
-    const hashedPassword = await this.generateHashedPassword(password);
-    return await this.repositories.signUpEmployer(req, hashedPassword);
   }
 
   generateOtp() {

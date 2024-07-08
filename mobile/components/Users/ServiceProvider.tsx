@@ -77,7 +77,7 @@ const ServiceProvider = (props: any) => {
           }}>
           <Menu.Item
             onPress={() =>
-              navigation.navigate('EditNanny_username', {
+              navigation.navigate('EditServiceProvider_1', {
                 user,
                 getServiceProviders,
                 ownerEmail,

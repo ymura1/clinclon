@@ -9,59 +9,70 @@ import {
   Button,
   Heading,
   Text,
-  Alert,
-  Center,
   Divider,
+  Alert,
   HStack,
+  Center,
 } from 'native-base';
 import validator from 'validator';
 
-const SignIn_Nanny = ({navigation}: any) => {
+const SignIn = ({navigation}: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [inputErrors, setInputErrors] = useState({type: '', msg: ''});
-
-  const validateEmail = (): boolean => {
-    let error = {type: '', msg: ''};
-    if (email.length === 0) {
-      error.type = 'EMPTY_EMAIL';
-      error.msg = 'Email is required';
-    }
-    if (!validator.isEmail(email)) {
-      error.type = 'INVALID_EMAIL_FORMAT';
-      error.msg = 'Email is not valid';
-    }
-    setInputErrors(error);
-    return error.type.length === 0 && error.msg.length === 0;
-  };
-
-  const validatePassword = (): boolean => {
-    let error = {type: '', msg: ''};
-    if (password.length === 0) {
-      error.type = 'EMPTY_PASSWORD';
-      error.msg = 'Password is required';
-    }
-    setInputErrors(error);
-    return error.type.length === 0 && error.msg.length === 0;
-  };
+  const [inputErrors, setInputErrors] = useState({
+    type: '',
+    msg: '',
+  });
 
   const signIn = () => {
     if (!validateEmail() || !validatePassword()) {
       return;
     }
     axios
-      .post(`${LOCAL_HOST_URL}/signIn_nanny`, {email, password})
-      .then(res => {
-        navigation.navigate('Home_nanny', {email});
-        setInputErrors({type: '', msg: ''});
+      .post(`${LOCAL_HOST_URL}/signIn`, {
+        email,
+        password,
+      })
+      .then(() => {
+        navigation.navigate('Home_Employer', {employerEmail: email});
       })
       .catch(err => {
         const errMsg = err.response.data.error;
-        setInputErrors({type: 'SIGN_IN_ERROR', msg: errMsg});
+        const error = {type: 'SIGN_IN_ERROR', msg: errMsg};
+        setInputErrors(error);
       });
   };
 
-  const alertSignInFailure = () => {
+  const validateEmail = (): boolean => {
+    if (email.length === 0) {
+      setInputErrors({
+        type: 'EMPTY_EMAIL',
+        msg: 'Email is required',
+      });
+      return false;
+    }
+    if (!validator.isEmail(email)) {
+      setInputErrors({
+        type: 'INVALID_EMAIL_FORMAT',
+        msg: 'Email is not valid',
+      });
+      return false;
+    }
+    return true;
+  };
+
+  const validatePassword = (): boolean => {
+    if (password.length === 0) {
+      setInputErrors({
+        type: 'EMPTY_PASSWORD',
+        msg: 'Password is required',
+      });
+      return false;
+    }
+    return true;
+  };
+
+  const alertSignInError = () => {
     return (
       <Alert status="error" w="100%">
         <Alert.Icon mt="1" />
@@ -74,9 +85,9 @@ const SignIn_Nanny = ({navigation}: any) => {
 
   return (
     <NativeBaseProvider>
-      {inputErrors.type === 'SIGN_IN_ERROR' && alertSignInFailure()}
+      {inputErrors.type === 'SIGN_IN_ERROR' && alertSignInError()}
       <Box m="5%">
-        <Heading size="md">Sign In (Nanny)</Heading>
+        <Heading size="md">Sign In</Heading>
         <Center>
           <Box w="100%" maxWidth="300px" my="6">
             <FormControl
@@ -85,7 +96,7 @@ const SignIn_Nanny = ({navigation}: any) => {
                 inputErrors.type === 'EMPTY_EMAIL' ||
                 inputErrors.type === 'INVALID_EMAIL_FORMAT'
               }>
-              <FormControl.Label>Email</FormControl.Label>
+              <FormControl.Label>Email Address</FormControl.Label>
               <Input
                 onChangeText={val => setEmail(val)}
                 autoCapitalize="none"
@@ -126,8 +137,8 @@ const SignIn_Nanny = ({navigation}: any) => {
             <Text
               underline
               fontSize="sm"
-              onPress={() => navigation.navigate('SignUp_Nanny')}>
-              Set password
+              onPress={() => navigation.navigate('SignUp')}>
+              Sign Up
             </Text>
           </Box>
           <Box>
@@ -145,4 +156,4 @@ const SignIn_Nanny = ({navigation}: any) => {
   );
 };
 
-export default SignIn_Nanny;
+export default SignIn;
