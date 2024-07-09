@@ -78,7 +78,6 @@ const Account_Admin = ({route}: any) => {
     axios
       .get(`${LOCAL_HOST_URL}/getRecord/${username}`)
       .then(res => {
-        console.log(res.data);
         setHistory(res.data);
       })
       .catch(err => {

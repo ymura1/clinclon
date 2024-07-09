@@ -1,24 +1,21 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   NativeBaseProvider,
   Box,
-  Center,
-  Button,
-  FormControl,
-  Select,
   HStack,
   Heading,
   Text,
+  Button,
+  Center,
+  FormControl,
+  Select,
   CheckIcon,
-  Divider,
 } from 'native-base';
-import {ScrollView} from 'react-native-gesture-handler';
 import DatePicker from 'react-native-date-picker';
 import moment from 'moment';
 
-const AddNanny_2 = ({route, navigation}: any) => {
-  const {ownerEmail, username, rate, rateType, getUsers, setErrors} =
-    route.params;
+const EditServiceProvider_3 = ({route, navigation}: any) => {
+  const {item, finalShifts, setFinalShifts} = route.params;
   const days = [
     'Monday',
     'Tuesday',
@@ -28,19 +25,22 @@ const AddNanny_2 = ({route, navigation}: any) => {
     'Saturday',
     'Sunday',
   ];
-  const [selectedDay, setSelectedDay] = useState('');
+  const [selectedDay, setSelectedDay] = useState(item.day);
   const [startTimeOpen, setStartTimeOpen] = useState(false);
   const [endTimeOpen, setEndTimeOpen] = useState(false);
-  const [startTime, setStartTime] = useState<Date | undefined>(undefined);
-  const [endTime, setEndTime] = useState<Date | undefined>(undefined);
-  const [lists, setLists] = useState([]);
+  const [startTime, setStartTime] = useState<string | Date>(item.start_time);
+  const [endTime, setEndTime] = useState<string | Date>(item.end_time);
   const [inputErrors, setInputErrors] = useState({
     type: '',
     msg: '',
   });
 
+  const convertFormat = (time: string | Date) => {
+    return typeof time === 'string' ? time : moment(time).format('LT');
+  };
+
   const validateInput = () => {
-    let error = {type: '', msg: ''};
+    let error = {type: "", msg: ""};
     if (startTime >= endTime) {
       error.type = 'START_END_SET_ERROR';
       error.msg = 'Please set the start time before the end time';
@@ -49,56 +49,33 @@ const AddNanny_2 = ({route, navigation}: any) => {
     return error.type.length === 0 && error.msg.length === 0;
   };
 
-  const clearInput = () => {
-    setSelectedDay('');
-    setStartTime(undefined);
-    setEndTime(undefined);
-    setInputErrors({type: '', msg: ''});
-  };
-
-  const addToLists = () => {
-    if (!validateInput()) {
-      return;
-    }
-
-    const data = {
+  const saveChanges = () => {
+    if (!validateInput()) return;
+    const updated = {
       day: selectedDay,
-      start: moment(startTime).format('LT'),
-      end: moment(endTime).format('LT'),
+      start_time: convertFormat(startTime),
+      end_time: convertFormat(endTime),
     };
-    setLists(l => [...l, data]);
-    clearInput();
-  };
-
-  const deleteList = list => {
-    setLists(l =>
-      l.filter(
-        item =>
-          item.day !== list.day &&
-          item.start !== list.start &&
-          item.end !== list.end,
-      ),
+    const value = finalShifts.filter(
+      s =>
+        s.day !== item.day &&
+        s.start_time !== item.start_time &&
+        s.end_time !== item.end_time,
     );
-  };
+    value.push(updated);
+    setFinalShifts(value);
 
-  const navigateToReviewPage = () => {
-    navigation.navigate('AddNanny_review', {
-      ownerEmail,
-      username,
-      rate,
-      rateType,
-      lists,
-      getUsers,
-      setErrors,
-    });
+    navigation.goBack();
   };
 
   return (
     <NativeBaseProvider>
       <Box m="5%">
-        <Heading>Assign schedule</Heading>
-        <Text mt={2}>Select a day, then start time and end time</Text>
-        <Center mt={8}>
+        <Center mt={6}>
+          <Text mb={6} bold fontSize={18}>{`${selectedDay.substring(
+            0,
+            3,
+          )} : ${convertFormat(startTime)} - ${convertFormat(endTime)}`}</Text>
           <Box maxW="300">
             <Center>
               <FormControl isRequired>
@@ -123,7 +100,7 @@ const AddNanny_2 = ({route, navigation}: any) => {
             <Center>
               <FormControl isRequired>
                 <Button variant="link" onPress={() => setStartTimeOpen(true)}>
-                  Pick start time
+                  Modify start time
                 </Button>
                 <DatePicker
                   modal
@@ -138,14 +115,7 @@ const AddNanny_2 = ({route, navigation}: any) => {
                     setStartTimeOpen(false);
                   }}
                 />
-                {startTime && (
-                  <Text textAlign="center">
-                    {moment(startTime).format('LT')}
-                  </Text>
-                )}
-                <FormControl.ErrorMessage>
-                  {inputErrors.msg}
-                </FormControl.ErrorMessage>
+                <Text textAlign="center">{convertFormat(startTime)}</Text>
               </FormControl>
             </Center>
             <Center>
@@ -153,7 +123,7 @@ const AddNanny_2 = ({route, navigation}: any) => {
                 isRequired
                 isInvalid={inputErrors.type == 'START_END_SET_ERROR'}>
                 <Button variant="link" onPress={() => setEndTimeOpen(true)}>
-                  Pick end time
+                  Modify end time
                 </Button>
                 <DatePicker
                   modal
@@ -168,51 +138,23 @@ const AddNanny_2 = ({route, navigation}: any) => {
                     setEndTimeOpen(false);
                   }}
                 />
-                {endTime && (
-                  <Text textAlign="center">{moment(endTime).format('LT')}</Text>
-                )}
                 <FormControl.ErrorMessage>
                   {inputErrors.msg}
                 </FormControl.ErrorMessage>
+                <Text textAlign="center">{convertFormat(endTime)}</Text>
               </FormControl>
             </Center>
-            {selectedDay && startTime && endTime && (
-              <Button onPress={addToLists} borderRadius={20} mt={4}>
-                Add
-              </Button>
-            )}
           </Box>
-          <Divider
-            my="2"
-            _light={{
-              bg: 'muted.800',
-            }}
-            _dark={{
-              bg: 'muted.50',
-            }}
-          />
-          <ScrollView>
-            {lists.map((list, index) => (
-              <HStack key={index}>
-                <Text p={4}>
-                  {'\u2B24'} {`${list.day}   ${list.start} - ${list.end}`}
-                </Text>
-                <Text
-                  p={4}
-                  underline
-                  color="#0e7490"
-                  onPress={() => deleteList(list)}>
-                  Delete
-                </Text>
-              </HStack>
-            ))}
-          </ScrollView>
-          <HStack space={2}>
-            <Button borderRadius={20} onPress={() => navigation.goBack()}>
-              Go Back
+          <HStack space={2} mt={10}>
+            <Button
+              w="40%"
+              borderRadius={20}
+              variant="subtle"
+              onPress={() => navigation.goBack()}>
+              Back
             </Button>
-            <Button borderRadius={20} onPress={navigateToReviewPage}>
-              Review
+            <Button w="40%" borderRadius={20} onPress={saveChanges}>
+              Save
             </Button>
           </HStack>
         </Center>
@@ -221,4 +163,4 @@ const AddNanny_2 = ({route, navigation}: any) => {
   );
 };
 
-export default AddNanny_2;
+export default EditServiceProvider_3;

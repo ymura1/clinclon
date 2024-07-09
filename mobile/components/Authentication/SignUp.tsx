@@ -16,7 +16,9 @@ import {
 } from 'native-base';
 import {PASSWORD_RULES} from '../../config.js';
 
-const SignUp_Admin = ({navigation}: any) => {
+const SignUp = ({navigation}: any) => {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmedPassword, setConfirmedPassword] = useState('');
@@ -25,19 +27,23 @@ const SignUp_Admin = ({navigation}: any) => {
     msg: '',
   });
 
-  const signUp = () => {
-    if (!validateEmail() || !validatePassword()) {
+  const checkUserRegistered = () => {
+    if (!validateName() || !validateEmail() || !validatePassword()) {
       return;
     }
     axios
-      .post(`${LOCAL_HOST_URL}/signUp_admin`, {
+      .post(`${LOCAL_HOST_URL}/checkUserRegistered`, {
         email,
-        password,
-        status: 'active',
-        createDate: new Date(),
       })
       .then(res => {
-        navigation.navigate('SignIn_Admin');
+        console.log('sign up res', res)
+        navigation.navigate('VerifyOTP', {
+          firstName,
+          lastName,
+          email,
+          password,
+          otp: res.data.otp,
+        });
       })
       .catch(err => {
         const errMsg = err.response.data.error;
@@ -46,37 +52,65 @@ const SignUp_Admin = ({navigation}: any) => {
       });
   };
 
+  const validateName = (): boolean => {
+    if (firstName.length === 0) {
+      setInputErrors({
+        type: 'EMPTY_FIRST_NAME',
+        msg: 'First name is required',
+      });
+      return false;
+    }
+    if (lastName.length === 0) {
+      setInputErrors({
+        type: 'EMPTY_LAST_NAME',
+        msg: 'Last name is required',
+      });
+      return false;
+    }
+    return true;
+  };
+
   const validateEmail = (): boolean => {
-    let error = {type: '', msg: ''};
     if (email.length === 0) {
-      error.type = 'EMPTY_EMAIL';
-      error.msg = 'Email is required';
+      setInputErrors({
+        type: 'EMPTY_EMAIL',
+        msg: 'Email is required',
+      });
+      return false;
     }
     if (!validator.isEmail(email)) {
-      error.type = 'INVALID_EMAIL_FORMAT';
-      error.msg = 'Email is not valid';
+      setInputErrors({
+        type: 'INVALID_EMAIL_FORMAT',
+        msg: 'Email is not valid',
+      });
+      return false;
     }
-    setInputErrors(error);
-    return error.type.length === 0 && error.msg.length === 0;
+    return true;
   };
 
   const validatePassword = () => {
-    let error = {type: '', msg: ''};
     if (!password.length || !confirmedPassword.length) {
-      error.type = 'EMPTY_PASSWORD';
-      error.msg = 'Password is required';
+      setInputErrors({
+        type: 'EMPTY_PASSWORD',
+        msg: 'Password is required',
+      });
+      return false;
     }
     if (!validator.isStrongPassword(password, PASSWORD_RULES)) {
-      error.type = 'WEAK_PASSWORD';
-      error.msg =
-        'Password must contain 8 characters, 1 number, 1 upper, 1 lower';
+      setInputErrors({
+        type: 'WEAK_PASSWORD',
+        msg: 'Password must contain 8 characters, 1 number, 1 upper, 1 lower',
+      });
+      return false;
     }
     if (password !== confirmedPassword) {
-      error.type = 'PASSWORD_MISMATCH';
-      error.msg = 'Password does not match';
+      setInputErrors({
+        type: 'PASSWORD_MISMATCH',
+        msg: 'Password does not match',
+      });
+      return false;
     }
-    setInputErrors(error);
-    return error.type.length === 0 && error.msg.length === 0;
+    return true;
   };
 
   const alertSignUpError = () => {
@@ -97,6 +131,30 @@ const SignUp_Admin = ({navigation}: any) => {
         <Heading size="md">Sign Up</Heading>
         <Center>
           <Box w="100%" maxWidth="300px" my="6">
+            <FormControl
+              isRequired
+              isInvalid={inputErrors.type === 'EMPTY_FIRST_NAME'}>
+              <FormControl.Label>First Name</FormControl.Label>
+              <Input
+                onChangeText={val => setFirstName(val)}
+                autoCorrect={false}
+              />
+              <FormControl.ErrorMessage>
+                {inputErrors.msg}
+              </FormControl.ErrorMessage>
+            </FormControl>
+            <FormControl
+              isRequired
+              isInvalid={inputErrors.type === 'EMPTY_LAST_NAME'}>
+              <FormControl.Label>Last Name</FormControl.Label>
+              <Input
+                onChangeText={val => setLastName(val)}
+                autoCorrect={false}
+              />
+              <FormControl.ErrorMessage>
+                {inputErrors.msg}
+              </FormControl.ErrorMessage>
+            </FormControl>
             <FormControl
               isRequired
               isInvalid={
@@ -142,7 +200,7 @@ const SignUp_Admin = ({navigation}: any) => {
               <FormControl.Label>Confirm Password</FormControl.Label>
               <Input
                 type="password"
-                onChangeText={val => setPassword(val)}
+                onChangeText={val => setConfirmedPassword(val)}
                 autoCapitalize="none"
                 autoCorrect={false}
               />
@@ -151,7 +209,7 @@ const SignUp_Admin = ({navigation}: any) => {
               </FormControl.ErrorMessage>
             </FormControl>
           </Box>
-          <Button onPress={() => signUp()} w="150" mb={4}>
+          <Button onPress={() => checkUserRegistered()} w="150" mb={4} borderRadius={20}>
             Sign Up
           </Button>
         </Center>
@@ -166,7 +224,7 @@ const SignUp_Admin = ({navigation}: any) => {
           <Text
             underline
             fontSize="sm"
-            onPress={() => navigation.navigate('SignIn_Admin')}>
+            onPress={() => navigation.navigate('SignIn')}>
             Sign In
           </Text>
         </Box>
@@ -175,4 +233,4 @@ const SignUp_Admin = ({navigation}: any) => {
   );
 };
 
-export default SignUp_Admin;
+export default SignUp;

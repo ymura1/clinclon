@@ -16,11 +16,11 @@ import {
 import axios from 'axios';
 import {LOCAL_HOST_URL} from '../../config.js';
 
-const User = (props: any) => {
-  const {user, getUsers, ownerEmail, setErrors} = props;
+const ServiceProvider = (props: any) => {
+  const {user, getServiceProviders, ownerEmail, setErrors} = props;
   const navigation = useNavigation();
   const cancelRef = React.useRef(null);
-  const {user_name, rate, rate_type, status, shifts} = user;
+  const {first_name, last_name, email_address, rate, rate_type, status, shifts} = user;
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const showToast = (description: string) => {
@@ -30,12 +30,12 @@ const User = (props: any) => {
     });
   };
 
-  const deleteUser = () => {
+  const deleteServiceProvider = () => {
     axios
-      .delete(`${LOCAL_HOST_URL}/user/${user_name}/${ownerEmail}`)
+      .delete(`${LOCAL_HOST_URL}/user/${email_address}`)
       .then(() => {
         showToast('User has been deleted!');
-        getUsers();
+        getServiceProviders();
       })
       .catch(() => {
         showToast('Failed to delete user.');
@@ -50,7 +50,10 @@ const User = (props: any) => {
       <HStack space={[2, 3]}>
         <VStack>
           <Text fontSize={16} bold>
-            {user_name}
+            {first_name} {last_name}
+          </Text>
+          <Text fontSize={12}>
+            {email_address}
           </Text>
         </VStack>
         <Spacer />
@@ -74,9 +77,9 @@ const User = (props: any) => {
           }}>
           <Menu.Item
             onPress={() =>
-              navigation.navigate('EditNanny_username', {
+              navigation.navigate('EditServiceProvider_1', {
                 user,
-                getUsers,
+                getServiceProviders,
                 ownerEmail,
                 setErrors,
               })
@@ -86,12 +89,12 @@ const User = (props: any) => {
           <Menu.Item onPress={() => setDeleteDialogOpen(true)}>
             Delete
           </Menu.Item>
-          <Menu.Item
+          {/* <Menu.Item
             onPress={() =>
               navigation.navigate('Account_Admin', {user_name, rate, rate_type})
             }>
             Show record
-          </Menu.Item>
+          </Menu.Item> */}
         </Menu>
       </HStack>
       <HStack justifyContent="space-between">
@@ -122,7 +125,7 @@ const User = (props: any) => {
         <AlertDialog.Content>
           <AlertDialog.CloseButton />
           <AlertDialog.Header>Delete</AlertDialog.Header>
-          <AlertDialog.Body>{`Are you sure to delete ${user_name}? This will delete all the records of shifts of the nanny.`}</AlertDialog.Body>
+          <AlertDialog.Body>{`Are you sure to delete ${first_name} ${last_name}? This will delete all the records of shifts of the nanny.`}</AlertDialog.Body>
           <AlertDialog.Footer>
             <Button.Group space={2}>
               <Button
@@ -131,7 +134,7 @@ const User = (props: any) => {
                 onPress={() => setDeleteDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button colorScheme="danger" onPress={() => deleteUser()}>
+              <Button colorScheme="danger" onPress={() => deleteServiceProvider()}>
                 Delete
               </Button>
             </Button.Group>
@@ -142,4 +145,4 @@ const User = (props: any) => {
   );
 };
 
-export default User;
+export default ServiceProvider;

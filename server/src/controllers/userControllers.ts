@@ -12,30 +12,44 @@ class UserControllers {
     res.send(user);
   }
 
-  async getUsers(req: any, res: any) {
-    const users = await this.models.getUsers(req.params.email);
-    res.send(users);
+  // async getUsers(req: any, res: any) {
+  //   const users = await this.models.getUsers(req.params.email);
+  //   res.send(users);
+  // }
+
+  async getServiceProviders(req: any, res: any) {
+    const serviceProviders = await this.models.getServiceProviders(
+      req.params.email
+    );
+    res.send(serviceProviders);
   }
 
-  async addUser(req: any, res: any) {
-    const response = await this.models.addUser(req.body);
+  // async addUser(req: any, res: any) {
+  // const response = await this.models.addUser(req.body);
+  // response ? res.sendStatus(200) : res.sendStatus(400);
+  // }
+
+  async addServiceProvider(req: any, res: any) {
+    const response = await this.models.addServiceProvider(req.body);
     response ? res.sendStatus(200) : res.sendStatus(400);
   }
 
-  async editUser(req: any, res: any) {
-    const response = await this.models.editUser(req.body);
-    response ? res.sendStatus(200) : res.sendStatus(400);
+  async editServiceProvider(req: any, res: any) {
+    console.log(req)
+    const response = await this.models.editServiceProvider(req.body);
+    // const response = await this.models.addServiceProvider(req.body);
+    // response ? res.sendStatus(200) : res.sendStatus(400);
   }
 
-  async isUserRegistered(req: any, res: any) {
-    const { ownerEmail, username } = req.body;
-    const response = await this.models.isUserRegistered(ownerEmail, username);
-    res.send(response);
-  }
+  // async isUserRegistered(req: any, res: any) {
+  //   const { ownerEmail, username } = req.body;
+  //   const response = await this.models.isUserRegistered(ownerEmail, username);
+  //   res.send(response);
+  // }
 
-  async deleteUser(req: any, res: any) {
-    const { username, email } = req.params;
-    const response = await this.models.deleteUser(email, username);
+  async deleteServiceProvider(req: any, res: any) {
+    const { email } = req.params;
+    const response = await this.models.deleteServiceProvider(email);
     response ? res.sendStatus(200) : res.sendStatus(400);
   }
 

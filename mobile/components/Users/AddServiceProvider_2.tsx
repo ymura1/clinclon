@@ -12,11 +12,21 @@ import {
   CheckIcon,
   Divider,
 } from 'native-base';
+import {ScrollView} from 'react-native-gesture-handler';
 import DatePicker from 'react-native-date-picker';
 import moment from 'moment';
 
-const AddNanny_schedule = ({route, navigation}: any) => {
-  const {finalShifts, setFinalShifts} = route.params;
+const AddServiceProvider_2 = ({route, navigation}: any) => {
+  const {
+    employerEmail,
+    serviceProviderEmail,
+    firstName,
+    lastName,
+    rate,
+    rateType,
+    getServiceProviders,
+    setErrors,
+  } = route.params;
   const days = [
     'Monday',
     'Tuesday',
@@ -27,10 +37,11 @@ const AddNanny_schedule = ({route, navigation}: any) => {
     'Sunday',
   ];
   const [selectedDay, setSelectedDay] = useState('');
-  const [startTime, setStartTime] = useState<string>('');
-  const [endTime, setEndTime] = useState<string>('');
   const [startTimeOpen, setStartTimeOpen] = useState(false);
   const [endTimeOpen, setEndTimeOpen] = useState(false);
+  const [startTime, setStartTime] = useState<Date | undefined>(undefined);
+  const [endTime, setEndTime] = useState<Date | undefined>(undefined);
+  const [lists, setLists] = useState([]);
   const [inputErrors, setInputErrors] = useState({
     type: '',
     msg: '',
@@ -38,64 +49,69 @@ const AddNanny_schedule = ({route, navigation}: any) => {
 
   const validateInput = () => {
     let error = {type: '', msg: ''};
-    if (selectedDay.length < 1) {
-      error.type = 'EMPTY_DAY';
-      error.msg = 'Please set the day';
-    }
-    if (startTime.length < 1) {
-      error.type = 'EMPTY_START_TIME';
-      error.msg = 'Please set the start time';
-    }
-    if (endTime.length < 1) {
-      error.type = 'EMPTY_END_TIME';
-      error.msg = 'Please set the end time';
-    }
     if (startTime >= endTime) {
       error.type = 'START_END_SET_ERROR';
       error.msg = 'Please set the start time before the end time';
-    }
-    if (isDayDuplicated(finalShifts)) {
-      error.type = 'DUPLICATE_INPUT';
-      error.msg = `${selectedDay} is already registered.`;
     }
     setInputErrors(error);
     return error.type.length === 0 && error.msg.length === 0;
   };
 
-  const isDayDuplicated = shifts => {
-    return finalShifts.some(e => e.day === selectedDay);
+  const clearInput = () => {
+    setSelectedDay('');
+    setStartTime(undefined);
+    setEndTime(undefined);
+    setInputErrors({type: '', msg: ''});
   };
 
-  const convertFormat = (time: string | Date) => {
-    return typeof time === 'string' ? time : moment(time).format('LT');
-  };
+  const addToLists = () => {
+    if (!validateInput()) {
+      return;
+    }
 
-  const addSchedule = () => {
-    if (!validateInput()) return;
-    const newValue = {
+    const data = {
       day: selectedDay,
-      start_time: convertFormat(startTime),
-      end_time: convertFormat(endTime),
+      start: moment(startTime).format('LT'),
+      end: moment(endTime).format('LT'),
     };
-    setFinalShifts(s => [...s, newValue]);
+    setLists(l => [...l, data]);
+    clearInput();
+  };
 
-    navigation.goBack();
+  const deleteList = list => {
+    setLists(l =>
+      l.filter(
+        item =>
+          item.day !== list.day &&
+          item.start !== list.start &&
+          item.end !== list.end,
+      ),
+    );
+  };
+
+  const navigateToReviewPage = () => {
+    navigation.navigate('AddServiceProvider_Review', {
+      employerEmail,
+      serviceProviderEmail,
+      firstName,
+      lastName,
+      rate,
+      rateType,
+      lists,
+      getServiceProviders,
+      setErrors,
+    });
   };
 
   return (
     <NativeBaseProvider>
       <Box m="5%">
-        <Heading>Add Nanny's schedule</Heading>
+        <Heading>Assign schedule</Heading>
         <Text mt={2}>Select a day, then start time and end time</Text>
         <Center mt={8}>
           <Box maxW="300">
             <Center>
-              <FormControl
-                isRequired
-                isInvalid={
-                  inputErrors.type === 'EMPTY_DAY' ||
-                  inputErrors.type === 'DUPLICATE_INPUT'
-                }>
+              <FormControl isRequired>
                 <Select
                   mb={4}
                   selectedValue={selectedDay}
@@ -112,19 +128,13 @@ const AddNanny_schedule = ({route, navigation}: any) => {
                     <Select.Item key={index} label={d} value={d} />
                   ))}
                 </Select>
-                <FormControl.ErrorMessage>
-                  {inputErrors.msg}
-                </FormControl.ErrorMessage>
               </FormControl>
             </Center>
             <Center>
-              <FormControl isRequired isInvalid={startTime.length < 1}>
+              <FormControl isRequired>
                 <Button variant="link" onPress={() => setStartTimeOpen(true)}>
                   Pick start time
                 </Button>
-                <FormControl.ErrorMessage>
-                  {inputErrors.msg}
-                </FormControl.ErrorMessage>
                 <DatePicker
                   modal
                   mode="time"
@@ -139,17 +149,19 @@ const AddNanny_schedule = ({route, navigation}: any) => {
                   }}
                 />
                 {startTime && (
-                  <Text textAlign="center">{convertFormat(startTime)}</Text>
+                  <Text textAlign="center">
+                    {moment(startTime).format('LT')}
+                  </Text>
                 )}
+                <FormControl.ErrorMessage>
+                  {inputErrors.msg}
+                </FormControl.ErrorMessage>
               </FormControl>
             </Center>
             <Center>
               <FormControl
                 isRequired
-                isInvalid={
-                  inputErrors.type === 'EMPTY_END_TIME' ||
-                  inputErrors.type == 'START_END_SET_ERROR'
-                }>
+                isInvalid={inputErrors.type == 'START_END_SET_ERROR'}>
                 <Button variant="link" onPress={() => setEndTimeOpen(true)}>
                   Pick end time
                 </Button>
@@ -167,13 +179,18 @@ const AddNanny_schedule = ({route, navigation}: any) => {
                   }}
                 />
                 {endTime && (
-                  <Text textAlign="center">{convertFormat(endTime)}</Text>
+                  <Text textAlign="center">{moment(endTime).format('LT')}</Text>
                 )}
                 <FormControl.ErrorMessage>
                   {inputErrors.msg}
                 </FormControl.ErrorMessage>
               </FormControl>
             </Center>
+            {selectedDay && startTime && endTime && (
+              <Button onPress={addToLists} borderRadius={20} my={4}>
+                Add
+              </Button>
+            )}
           </Box>
           <Divider
             my="2"
@@ -184,16 +201,31 @@ const AddNanny_schedule = ({route, navigation}: any) => {
               bg: 'muted.50',
             }}
           />
-          <HStack space={2} justifyContent="center" mt={10}>
+          <ScrollView>
+            {lists.map((list, index) => (
+              <HStack key={index}>
+                <Text p={4}>
+                  {'\u2B24'} {`${list.day}   ${list.start} - ${list.end}`}
+                </Text>
+                <Text
+                  p={4}
+                  underline
+                  color="#0e7490"
+                  onPress={() => deleteList(list)}>
+                  Delete
+                </Text>
+              </HStack>
+            ))}
+          </ScrollView>
+          <HStack space={2} my={4} w="90%" justifyContent="space-around">
             <Button
-              w="40%"
               borderRadius={20}
-              variant="subtle"
-              onPress={() => navigation.goBack()}>
+              onPress={() => navigation.goBack()}
+              w="40%">
               Go Back
             </Button>
-            <Button w="40%" borderRadius={20} onPress={addSchedule}>
-              Add
+            <Button borderRadius={20} onPress={navigateToReviewPage} w="40%">
+              Review
             </Button>
           </HStack>
         </Center>
@@ -202,4 +234,4 @@ const AddNanny_schedule = ({route, navigation}: any) => {
   );
 };
 
-export default AddNanny_schedule;
+export default AddServiceProvider_2;

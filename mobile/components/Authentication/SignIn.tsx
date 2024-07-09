@@ -16,7 +16,7 @@ import {
 } from 'native-base';
 import validator from 'validator';
 
-const SignIn_Admin = ({navigation}: any) => {
+const SignIn = ({navigation}: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [inputErrors, setInputErrors] = useState({
@@ -29,12 +29,13 @@ const SignIn_Admin = ({navigation}: any) => {
       return;
     }
     axios
-      .post(`${LOCAL_HOST_URL}/signIn_admin`, {
+      .post(`${LOCAL_HOST_URL}/signIn`, {
         email,
         password,
       })
-      .then(() => {
-        navigation.navigate('Home_admin', {ownerEmail: email});
+      .then((res) => {
+        const {firstName, lastName} = res.data;
+        navigation.navigate('Home', {firstName, lastName, email});
       })
       .catch(err => {
         const errMsg = err.response.data.error;
@@ -44,27 +45,32 @@ const SignIn_Admin = ({navigation}: any) => {
   };
 
   const validateEmail = (): boolean => {
-    let error = {type: '', msg: ''};
     if (email.length === 0) {
-      error.type = 'EMPTY_EMAIL';
-      error.msg = 'Email is required';
+      setInputErrors({
+        type: 'EMPTY_EMAIL',
+        msg: 'Email is required',
+      });
+      return false;
     }
     if (!validator.isEmail(email)) {
-      error.type = 'INVALID_EMAIL_FORMAT';
-      error.msg = 'Email is not valid';
+      setInputErrors({
+        type: 'INVALID_EMAIL_FORMAT',
+        msg: 'Email is not valid',
+      });
+      return false;
     }
-    setInputErrors(error);
-    return error.type.length === 0 && error.msg.length === 0;
+    return true;
   };
 
   const validatePassword = (): boolean => {
-    let error = {type: '', msg: ''};
     if (password.length === 0) {
-      error.type = 'EMPTY_PASSWORD';
-      error.msg = 'Password is required';
+      setInputErrors({
+        type: 'EMPTY_PASSWORD',
+        msg: 'Password is required',
+      });
+      return false;
     }
-    setInputErrors(error);
-    return error.type.length === 0 && error.msg.length === 0;
+    return true;
   };
 
   const alertSignInError = () => {
@@ -82,7 +88,7 @@ const SignIn_Admin = ({navigation}: any) => {
     <NativeBaseProvider>
       {inputErrors.type === 'SIGN_IN_ERROR' && alertSignInError()}
       <Box m="5%">
-        <Heading size="md">Sign In (Admin)</Heading>
+        <Heading size="md">Sign In</Heading>
         <Center>
           <Box w="100%" maxWidth="300px" my="6">
             <FormControl
@@ -132,7 +138,7 @@ const SignIn_Admin = ({navigation}: any) => {
             <Text
               underline
               fontSize="sm"
-              onPress={() => navigation.navigate('SignUp_Admin')}>
+              onPress={() => navigation.navigate('SignUp')}>
               Sign Up
             </Text>
           </Box>
@@ -151,4 +157,4 @@ const SignIn_Admin = ({navigation}: any) => {
   );
 };
 
-export default SignIn_Admin;
+export default SignIn;

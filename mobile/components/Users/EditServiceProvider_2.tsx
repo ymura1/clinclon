@@ -5,10 +5,8 @@ import {
   HStack,
   Heading,
   Text,
-  IconButton,
   Button,
 } from 'native-base';
-import AntDesign from 'react-native-vector-icons/AntDesign';
 
 interface dayTimeObject {
   day: string;
@@ -16,22 +14,17 @@ interface dayTimeObject {
   end_time: string;
 }
 
-const EditNanny_schedule_home = ({route, navigation}: any) => {
+const EditServiceProvider_2 = ({route, navigation}: any) => {
   const {
-    ownerEmail,
-    user_name,
-    updatedUsername,
-    updatedRate,
-    updatedRateType,
-    updatedStatus,
+    params,
     shifts,
-    getUsers,
+    getServiceProviders,
     setErrors,
   } = route.params;
   const [finalShifts, setFinalShifts] = useState(shifts);
 
   const navigateToEditPage = (item: dayTimeObject) => {
-    navigation.navigate('EditNanny_schedule', {
+    navigation.navigate('EditServiceProvider_3', {
       item,
       finalShifts,
       setFinalShifts,
@@ -39,19 +32,14 @@ const EditNanny_schedule_home = ({route, navigation}: any) => {
   };
 
   const navigateToAddPage = () => {
-    navigation.navigate('AddNanny_schedule', {finalShifts, setFinalShifts});
+    navigation.navigate('EditAddServiceProvider', {params, shifts, getServiceProviders, setErrors});
   };
 
   const navigateToReviewPage = () => {
-    navigation.navigate('EditNanny_review', {
-      finalShifts,
-      ownerEmail,
-      user_name,
-      updatedUsername,
-      updatedRate,
-      updatedRateType,
-      updatedStatus,
-      getUsers,
+    setParams();
+    navigation.navigate('EditServiceProvider_review', {
+      params,
+      getServiceProviders,
       setErrors,
     });
   };
@@ -63,6 +51,31 @@ const EditNanny_schedule_home = ({route, navigation}: any) => {
     setFinalShifts(result);
   };
 
+  const setParams = () => {
+    const original = sortDays(shifts);
+    const updated = sortDays(finalShifts);
+    if (JSON.stringify(original) !== JSON.stringify(updated)) {
+      params.shifts = updated;
+    }
+    return params;
+  }
+
+  const sortDays = (shifts: any) => {
+    if (shifts == undefined || shifts[0].day === null) return;
+    const sorter = {
+      Monday: 1,
+      Tuesday: 2,
+      Wednesday: 3,
+      Thursday: 4,
+      Friday: 5,
+      Saturday: 6,
+      Sunday: 7,
+    };
+    return shifts.sort((a, b) => {
+      return sorter[a.day] - sorter[b.day];
+    });
+  };
+
   return (
     <NativeBaseProvider>
       <Box m="5%">
@@ -70,31 +83,29 @@ const EditNanny_schedule_home = ({route, navigation}: any) => {
         <Button borderRadius={20} w="50%" mb={6} onPress={navigateToAddPage}>
           Add new schedule
         </Button>
-        <Text ml={4}>Current schedule: </Text>
+        <Text ml={4}>Current schedule:</Text>
         {finalShifts.length > 0 ? (
           finalShifts.map((f, index) => (
             <HStack key={index} space={3} justifyContent="center">
               <Text pt={3} fontSize={16}>{`${f.day.substring(0, 3)} : ${
                 f.start_time
               } - ${f.end_time}`}</Text>
-              <Box>
-                <IconButton
-                  _icon={{
-                    as: AntDesign,
-                    name: 'delete',
-                  }}
-                  onPress={() => deleteList(f)}
-                />
-              </Box>
-              <Box>
-                <IconButton
-                  _icon={{
-                    as: AntDesign,
-                    name: 'edit',
-                  }}
-                  onPress={() => navigateToEditPage(f)}
-                />
-              </Box>
+              <Text
+                pt={3}
+                fontSize={14}
+                underline
+                color="#3b5998"
+                onPress={() => navigateToEditPage(f)}>
+                Edit
+              </Text>
+              <Text
+                pt={3}
+                fontSize={14}
+                underline
+                color="#3b5998"
+                onPress={() => deleteList(f)}>
+                Delete
+              </Text>
             </HStack>
           ))
         ) : (
@@ -122,4 +133,4 @@ const EditNanny_schedule_home = ({route, navigation}: any) => {
   );
 };
 
-export default EditNanny_schedule_home;
+export default EditServiceProvider_2;
