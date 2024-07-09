@@ -27,19 +27,23 @@ const SignUp = ({navigation}: any) => {
     msg: '',
   });
 
-  const signUp = () => {
+  const checkUserRegistered = () => {
     if (!validateName() || !validateEmail() || !validatePassword()) {
       return;
     }
     axios
-      .post(`${LOCAL_HOST_URL}/signUp`, {
-        firstName,
-        lastName,
+      .post(`${LOCAL_HOST_URL}/checkUserRegistered`, {
         email,
-        password,
       })
       .then(res => {
-        navigation.navigate('Home_Employer', {email: email});
+        console.log('sign up res', res)
+        navigation.navigate('VerifyOTP', {
+          firstName,
+          lastName,
+          email,
+          password,
+          otp: res.data.otp,
+        });
       })
       .catch(err => {
         const errMsg = err.response.data.error;
@@ -205,7 +209,7 @@ const SignUp = ({navigation}: any) => {
               </FormControl.ErrorMessage>
             </FormControl>
           </Box>
-          <Button onPress={() => signUp()} w="150" mb={4} borderRadius={20}>
+          <Button onPress={() => checkUserRegistered()} w="150" mb={4} borderRadius={20}>
             Sign Up
           </Button>
         </Center>

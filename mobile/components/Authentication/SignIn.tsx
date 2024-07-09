@@ -33,8 +33,9 @@ const SignIn = ({navigation}: any) => {
         email,
         password,
       })
-      .then(() => {
-        navigation.navigate('Home_Employer', {employerEmail: email});
+      .then((res) => {
+        const {firstName, lastName} = res.data;
+        navigation.navigate('Home', {firstName, lastName, email});
       })
       .catch(err => {
         const errMsg = err.response.data.error;

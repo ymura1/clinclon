@@ -24,6 +24,10 @@ class AutheModels {
     return await this.repositories.isUserRegistered(email);
   }
 
+  async getName(email: string) {
+    return await this.repositories.getName(email);
+  }
+
   async signUp(req: any) {
     const password = req.password;
     if (password === null) return;
@@ -31,32 +35,10 @@ class AutheModels {
     return await this.repositories.signUp(req, hashedPassword);
   }
 
-  async isEmployerRegistered(email: string) {
-    const userId = await this.repositories.getUserId(email);
-    if (!userId) return false;
-    return await this.repositories.isUserEmployer(userId);
-  }
-
-  async isNannyRegistered(username: string) {
-    return await this.repositories.isNannyRegistered(username);
-  }
-
   async isPasswordMatch(email: string, password: string) {
     const hashedPassword = await this.repositories.getPassword(email);
     const isMatch = await bcrypt.compare(password, hashedPassword);
     return isMatch;
-  }
-
-  async isPasswordRegistered(username: string) {
-    return await this.repositories.isNannyPasswordRegistered(username);
-  }
-
-  async setNannyPassword(username: string, password: string) {
-    const hashedPassword = await bcrypt.hash(
-      password,
-      Number(process.env.SALT_ROUNDS)
-    );
-    return await this.repositories.setNannyPassword(username, hashedPassword);
   }
 
   async generateHashedPassword(password: string) {
@@ -68,44 +50,40 @@ class AutheModels {
   }
 
   generateOtp() {
-    return Math.floor(100000 + Math.random() * 900000);
+    return (Math.floor(100000 + Math.random() * 900000)).toString();
   }
 
-  async sendOtp(email: string) {
-    const otp = this.generateOtp();
-
+  async sendOtp(email: string, otp: string) {
     const mailOptions = {
       from: process.env.MAIL_USER,
       to: email,
       subject: "Sending Reset Password Code",
       text: `Enter the following code when prompted: ${otp}. It will be expired in 10 minutes.`,
     };
-
     try {
       await transporter.sendMail(mailOptions);
-      return otp;
+      return true;
     } catch (err) {
-      console.log(err);
-      return err;
+      return false;
     } finally {
       transporter.close();
     }
   }
 
-  async storeOtp(email: string, otp: number) {
-    const ownerId = await this.repositories.getOwnerId(email);
-    return await this.repositories.storeOtp(otp, ownerId);
+  async storeOtp(email: string, otp: string) {
+    console.log('email', email)
+    const userId = await this.repositories.getUserId(email);
+    return await this.repositories.storeOtp(otp, userId);
   }
 
-  async updateOtp(email: string) {
-    const otp = this.generateOtp();
-    const ownerId = await this.repositories.getOwnerId(email);
-    return await this.repositories.updateOtp(otp, ownerId);
+  async updateOtp(email: string, otp: string) {
+    const ownerId = await this.repositories.getUserId(email);
+    // return await this.repositories.updateOtp(otp, ownerId);
   }
 
   async validateCodeExpiration(req: any) {
     const { ownerEmail, submittedDate } = req;
-    const ownerId = await this.repositories.getOwnerId(ownerEmail);
+    const ownerId = await this.repositories.getUserId(ownerEmail);
     const isValid = await this.repositories.validateCodeExpiration(
       ownerId,
       submittedDate
@@ -113,29 +91,9 @@ class AutheModels {
     return isValid;
   }
 
-  async validateCodeMatch(req: any) {
-    const { code, ownerEmail } = req;
-    const ownerId = await this.repositories.getOwnerId(ownerEmail);
-    const isCodeMatch = await this.repositories.validateCodeMatch(
-      ownerId,
-      code
-    );
-    return isCodeMatch;
-  }
-
-  async isPasswordSame(req: any) {
-    const { ownerEmail, newPassword } = req;
-    const ownerId = await this.repositories.getOwnerId(ownerEmail);
-    const hashedNewPassword = await bcrypt.hash(
-      newPassword,
-      Number(process.env.SALT_ROUNDS)
-    );
-    return await this.repositories.isPasswordSame(ownerId, hashedNewPassword);
-  }
-
   async resetPassword(req: any) {
     const { password, ownerEmail } = req;
-    const ownerId = await this.repositories.getOwnerId(ownerEmail);
+    const ownerId = await this.repositories.getUserId(ownerEmail);
     const hashedPassword = await bcrypt.hash(
       password,
       Number(process.env.SALT_ROUNDS)

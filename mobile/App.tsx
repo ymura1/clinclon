@@ -10,12 +10,11 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import SignUp from './components/Authentication/SignUp';
 import SignIn from './components/Authentication/SignIn';
+import Home from './components/Users/Home';
 import ServiceProviders from './components/Users/ServiceProviders';
-import Home_nanny from './components/Home_nanny';
 import ForgotPassword from './components/Authentication/ForgotPassword';
 import ResetPassword from './components/Authentication/ResetPassword';
 import VerifyOTP from './components/Authentication/VerifyOTP';
-import Home_Employer from './components/Home_Employer';
 import Account from './components/Users/Account';
 import Account_Admin from './components/Users/Account_Admin';
 import AddServiceProvider_1 from './components/Users/AddServiceProvider_1';
@@ -68,8 +67,8 @@ function App(): JSX.Element {
           options={{gestureEnabled: false}}
         />
         <Stack.Screen
-          name="Home_Employer"
-          component={Home_Employer}
+          name="Home"
+          component={Home}
           options={({navigation}) => ({
             headerTitle: 'Home',
             gestureEnabled: false,
@@ -77,7 +76,7 @@ function App(): JSX.Element {
             headerRight: () => (
               <Button
                 title="Sign Out"
-                onPress={() => navigation.navigate('Start')}
+                onPress={() => navigation.navigate('SignIn')}
               />
             ),
           })}
@@ -100,21 +99,6 @@ function App(): JSX.Element {
           name="Account_Admin"
           component={Account_Admin}
           options={{title: 'Account', gestureEnabled: false}}
-        />
-        <Stack.Screen
-          name="Home_nanny"
-          component={Home_nanny}
-          options={({navigation}) => ({
-            headerTitle: 'Home',
-            gestureEnabled: false,
-            headerLeft: () => null,
-            headerRight: () => (
-              <Button
-                title="Sign Out"
-                onPress={() => navigation.navigate('Start')}
-              />
-            ),
-          })}
         />
         <Stack.Screen
           name="AddServiceProvider_1"

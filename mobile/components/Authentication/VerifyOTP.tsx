@@ -11,27 +11,37 @@ import {
 } from 'native-base';
 
 const VerifyOTP = ({route, navigation}: any) => {
-  const correctOtp = route.params.otp;
-  const [otp, setOtp] = useState(new Array(6).fill(''));
-  const [otpError, setOtpError] = useState<null | string>(null);
+  const { firstName, lastName, email, password, otp } = route.params;
+  const [input, setInput] = useState(new Array(6).fill(''));
+  const [inputError, setInputError] = useState<null | string>(null);
   const otpBoxReference = useRef([]);
+  console.log(typeof otp)
 
   useEffect(() => {
-    if (otp.join("").length === 6) {
-      if (Number(otp.join("")) === correctOtp) {
-        navigation.navigate('ResetPassword', {email: route.params.email})
+    if (input.join("").length === 6) {
+      if (input.join("") === otp) {
+        signUp();
       } else {
-        setOtpError('Wrong OTP, please check again');
+        setInputError('Wrong OTP, please check again');
       }
     } else {
-      setOtpError(null)
+      setInputError(null)
     }
-  }, [otp])
+  }, [input])
+
+  const signUp = () => {
+    axios.post(`${LOCAL_HOST_URL}/signUp`, {
+      firstName, lastName, email, password
+    })
+    .then((res) => {
+      navigation.navigate('Home', {firstName, lastName, email})
+    })
+  }
 
   const handleChange = (value: string, index: number) => {
-    let newArr = [...otp];
+    let newArr = [...input];
     newArr[index] = value;
-    setOtp(newArr);
+    setInput(newArr);
 
     if (value && index < 5) {
       otpBoxReference.current[index + 1].focus();
@@ -40,6 +50,7 @@ const VerifyOTP = ({route, navigation}: any) => {
 
   const handleBackspaceAndEnter = (e, index) => {
     const key = e.nativeEvent.key;
+
     if (key === 'Backspace' && !e.target.value && index > 0) {
       otpBoxReference.current[index - 1].focus();
     }
@@ -50,7 +61,7 @@ const VerifyOTP = ({route, navigation}: any) => {
 
   const resendOtp = () => {
     axios
-      .post(`${LOCAL_HOST_URL}/otp/resend`, {email: route.params.email})
+      .post(`${LOCAL_HOST_URL}/resendOTP`, {email: route.params.email})
       .then(() => {})
       .catch(() => {});
   };
@@ -68,7 +79,7 @@ const VerifyOTP = ({route, navigation}: any) => {
           alignItems="center"
           mt={8}
           h="10%">
-          {otp.map((digit, index) => (
+          {input.map((digit, index) => (
             <Input
               key={index}
               value={digit}
@@ -81,7 +92,7 @@ const VerifyOTP = ({route, navigation}: any) => {
             />
           ))}
         </HStack>
-        {setOtpError !== null && <Text color="#ff0000" >{otpError}</Text>}
+        {inputError !== null && <Text color="#ff0000" >{inputError}</Text>}
         <Text my={4}>
           Didn't receive a code?{' '}
           <Text underline color="#1E90FF" onPress={resendOtp}>

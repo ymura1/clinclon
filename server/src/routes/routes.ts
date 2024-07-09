@@ -12,13 +12,11 @@ class Routes {
 
     applyRouting(app: any) {
         // auth routes
+        app.post('/checkUserRegistered', this.authControllers.isUserRegistered.bind(this.authControllers));
         app.post('/signUp', this.authControllers.signUp.bind(this.authControllers));
         app.post('/signIn', this.authControllers.signIn.bind(this.authControllers));
-        // app.post('/user/reset', this.authControllers.sendOtp.bind(this.authControllers));
-        app.post('/user/code', this.authControllers.validateCode.bind(this.authControllers));
-        app.post('/user/validate/password', this.authControllers.validatePassword.bind(this.authControllers));
         app.post('/reset/password', this.authControllers.resetPassword.bind(this.authControllers));
-        app.post('/otp/resend', this.authControllers.resendOTP.bind(this.authControllers));
+        app.post('/resendOTP', this.authControllers.resendOTP.bind(this.authControllers));
 
         // user routes
         app.get('/getServiceProviders/:email', this.userControllers.getServiceProviders.bind(this.userControllers));

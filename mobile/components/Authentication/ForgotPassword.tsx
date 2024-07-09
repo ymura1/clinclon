@@ -64,7 +64,7 @@ const ForgotPassword = ({navigation}: any) => {
     <NativeBaseProvider>
       {inputErrors.type === 'EMAIL_NOT_REGISTERED' && alertError()}
       <Box m="5%">
-        <Heading size="lg">Forgot Password</Heading>
+        <Heading size="lg">Reset Password</Heading>
         <Box alignItems="center">
           <Box w="100%" maxWidth="300px" my="8">
             <FormControl
@@ -104,9 +104,9 @@ const ForgotPassword = ({navigation}: any) => {
             <Text
               underline
               onPress={() => {
-                navigation.navigate('Start');
+                navigation.navigate('SignIn');
               }}>
-              Home
+              Sign in
             </Text>
           </Text>
         </Box>
